@@ -187,4 +187,9 @@ async def handle_callback_confirm(call: types.CallbackQuery, state: FSMContext):
                 )
     # TODO: send invoice and shipping info etc; checkout from db after
     # successful payment
+        from .payment import Product, buy
+        package = Package.from_json(get_package_records()[data["chosen_package_index"]])
+        product = Product(title="Пакет с едой", description=f"Описание: {package.description}", label="Пакет", price=package.price)
+
+        await buy(call.message, product)
     await state.finish()
