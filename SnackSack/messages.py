@@ -5,4 +5,5 @@ class RU:
     CLIENT_BTN = "Клиент"
     PARTNER_BTN = "Партнёр"
 
+
 MSG = RU

@@ -6,7 +6,7 @@ from .partner import Partner
 
 class PackageDB:
     def __init__(self, file):
-        self.file = file # "packages.json"
+        self.file = file  # "packages.json"
         self.records = []
 
         try:
@@ -16,11 +16,9 @@ class PackageDB:
         except Exception as e:
             raise e
 
-
     def update_file(self):
         with open(self.file, "w") as f:
             json.dump(self.records, f, indent=4)
-
 
     def checkout(self, index: int, amount: int = 1):
         try:
@@ -43,7 +41,7 @@ class PackageDB:
 
 class PartnerDB:
     def __init__(self, file):
-        self.file = file # "partners.json"
+        self.file = file  # "partners.json"
         self.records = []
 
         try:
@@ -53,11 +51,9 @@ class PartnerDB:
         except Exception as e:
             raise e
 
-
     def update_file(self):
         with open(self.file, "w") as f:
             json.dump(self.records, f, indent=4)
-
 
     def create(self, record: Partner):
         self.records.append(record.to_json())

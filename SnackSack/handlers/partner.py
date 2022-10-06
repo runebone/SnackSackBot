@@ -42,22 +42,28 @@ async def partner(message: types.Message):
         no_btn = IKB("Нет", callback_data="cb_no")
         markup.add(yes_btn, no_btn)
 
-        await message.answer("Упс, похоже, вас нет в базе данных. Хотите стать партнёром?", reply_markup=markup)
+        await message.answer(
+            "Упс, похоже, вас нет в базе данных. Хотите стать партнёром?",
+            reply_markup=markup,
+        )
     else:
         markup = get_partner_menu_markup()
-        await message.answer(f"Добро пожаловать, <b>{message.from_user.first_name}</b>! ✨", reply_markup=markup)
+        await message.answer(
+            f"Добро пожаловать, <b>{message.from_user.first_name}</b>! ✨",
+            reply_markup=markup,
+        )
 
 
 @dp.callback_query_handler(lambda cb: cb.data == "cb_yes", state=None)
 async def handle_callback_create_partner(call: types.CallbackQuery):
     await FSM.create_partner.set()
-    await call.answer("✅") # TODO: all messages -> message
+    await call.answer("✅")  # TODO: all messages -> message
     await bot.edit_message_text(
-            call.message.text + " ✅",
-            call.message.chat.id,
-            call.message.message_id,
-            reply_markup=None
-            )
+        call.message.text + " ✅",
+        call.message.chat.id,
+        call.message.message_id,
+        reply_markup=None,
+    )
     await bot.send_message(call.message.chat.id, "Введите название своего магазина:")
 
 
@@ -65,11 +71,11 @@ async def handle_callback_create_partner(call: types.CallbackQuery):
 async def handle_callback_dont_create_partner(call: types.CallbackQuery):
     await call.answer("🚫")
     await bot.edit_message_text(
-            call.message.text + " 🚫",
-            call.message.chat.id,
-            call.message.message_id,
-            reply_markup=None
-            )
+        call.message.text + " 🚫",
+        call.message.chat.id,
+        call.message.message_id,
+        reply_markup=None,
+    )
 
 
 @dp.message_handler(state=FSM.create_partner)
@@ -94,12 +100,7 @@ def get_partner_menu_markup():
     my_packages_btn = IKB("Мои пакеты", callback_data="cb_my_packages")
     create_package_btn = IKB("Создать пакет", callback_data="cb_create_package")
 
-    markup.add(
-            my_shops_btn,
-            my_orders_btn,
-            my_packages_btn,
-            create_package_btn
-            )
+    markup.add(my_shops_btn, my_orders_btn, my_packages_btn, create_package_btn)
 
     return markup
 
@@ -109,7 +110,7 @@ def get_partner(chat_id: int) -> Partner | None:
     for record in db["partner"].records:
         if record["chat_id"] == chat_id:
             partner = record
-            break # FIXME
+            break  # FIXME
 
     if partner != None:
         partner = Partner.from_json(partner)
@@ -135,34 +136,39 @@ def get_shops_menu_markup(chat_id: int):
 
 @dp.callback_query_handler(lambda cb: cb.data == "cb_my_shops", state="*")
 async def handle_callback_my_shops(call: types.CallbackQuery, state: FSMContext):
-    if state != None: await state.finish()
+    if state != None:
+        await state.finish()
 
     markup = get_shops_menu_markup(call.message.chat.id)
 
     await bot.edit_message_text(
-            "🏡 Ваши магазины:",
-            call.message.chat.id,
-            call.message.message_id,
-            reply_markup=markup
-            )
+        "🏡 Ваши магазины:",
+        call.message.chat.id,
+        call.message.message_id,
+        reply_markup=markup,
+    )
 
 
 def get_random_nature_emoji():
     from numpy.random import choice
+
     nature_emojis = "🍀🍁🌺🌲🌳🌻🍂"
     return choice(list(nature_emojis))
 
 
 @dp.callback_query_handler(lambda cb: cb.data == "cb_back_to_partner_menu", state="*")
-async def handle_callback_back_to_partner_menu(call: types.CallbackQuery, state: FSMContext):
-    if state != None: await state.finish()
+async def handle_callback_back_to_partner_menu(
+    call: types.CallbackQuery, state: FSMContext
+):
+    if state != None:
+        await state.finish()
 
     await bot.edit_message_text(
-            f"{get_random_nature_emoji()} Меню {get_random_nature_emoji()}",
-            call.message.chat.id,
-            call.message.message_id,
-            reply_markup=get_partner_menu_markup()
-            )
+        f"{get_random_nature_emoji()} Меню {get_random_nature_emoji()}",
+        call.message.chat.id,
+        call.message.message_id,
+        reply_markup=get_partner_menu_markup(),
+    )
 
 
 @dp.callback_query_handler(lambda cb: re.match(r"cb_shop(\d+)", cb.data), state=None)
@@ -184,7 +190,9 @@ async def handle_callback_shop_n(call: types.CallbackQuery):
 
     markup = IKM(row_width=1)
 
-    add_new_address = IKB("Добавить новый адрес", callback_data="cb_unavaliable_in_demo")
+    add_new_address = IKB(
+        "Добавить новый адрес", callback_data="cb_unavaliable_in_demo"
+    )
     change_address = IKB("Изменить адрес", callback_data="cb_unavaliable_in_demo")
     delete_address = IKB("Удалить адрес", callback_data="cb_unavaliable_in_demo")
 
@@ -192,11 +200,9 @@ async def handle_callback_shop_n(call: types.CallbackQuery):
 
     markup.add(IKB("Назад", callback_data="cb_my_shops"))
 
-    await bot.edit_message_text(msg,
-            call.message.chat.id,
-            call.message.message_id,
-            reply_markup=markup
-            )
+    await bot.edit_message_text(
+        msg, call.message.chat.id, call.message.message_id, reply_markup=markup
+    )
 
 
 @dp.callback_query_handler(lambda cb: cb.data == "cb_my_orders", state=None)
@@ -225,25 +231,34 @@ async def handle_callback_my_packages(call: types.CallbackQuery):
         create_package_btn = IKB("Создать пакет", callback_data="cb_create_package")
         markup.add(create_package_btn)
 
-        await bot.send_message(call.message.chat.id, "ℹ️ У вас пока нет пакетов, но вы можете создать их:", reply_markup=markup)
+        await bot.send_message(
+            call.message.chat.id,
+            "ℹ️ У вас пока нет пакетов, но вы можете создать их:",
+            reply_markup=markup,
+        )
     else:
         msg = [f"{i+1}. {packages[i]}\n/delete{i+1}" for i in range(len(packages))]
         msg = "📦 <b>Ваши пакеты:</b>\n\n" + "\n\n".join(msg)
-        msg = msg + "\n\n<i>Вне демо-версии, вместо UUID должна будет подцепляться информация о пакете из БД пакетов.</i>"
+        msg = (
+            msg
+            + "\n\n<i>Вне демо-версии, вместо UUID должна будет подцепляться информация о пакете из БД пакетов.</i>"
+        )
 
         markup = IKM(row_width=1)
         markup.add(IKB("Назад", callback_data="cb_back_to_partner_menu"))
 
-        await bot.edit_message_text(msg,
-                call.message.chat.id,
-                call.message.message_id,
-                reply_markup=markup
-                )
+        await bot.edit_message_text(
+            msg, call.message.chat.id, call.message.message_id, reply_markup=markup
+        )
 
 
 # FIXME XXX
 from aiogram.dispatcher import filters
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['/delete([0-9]*)']), state=None)
+
+
+@dp.message_handler(
+    filters.RegexpCommandsFilter(regexp_commands=["/delete([0-9]*)"]), state=None
+)
 async def delete_package(message: types.Message):
     await message.answer("ℹ️ Команда недоступна в демо-версии.")
 
@@ -269,20 +284,24 @@ async def handle_callback_create_package(call: types.CallbackQuery):
 
     markup = IKM(row_width=1)
 
-    buttons = [IKB(shops[i], callback_data=f"cb_choose_shop{i}") for i in range(len(shops))]
+    buttons = [
+        IKB(shops[i], callback_data=f"cb_choose_shop{i}") for i in range(len(shops))
+    ]
     back_btn = IKB("Назад", callback_data="cb_back_to_partner_menu")
 
     markup.add(*buttons, back_btn)
 
     await bot.edit_message_text(
-            "Выберите магазин:",
-            call.message.chat.id,
-            call.message.message_id,
-            reply_markup=markup
-            )
+        "Выберите магазин:",
+        call.message.chat.id,
+        call.message.message_id,
+        reply_markup=markup,
+    )
 
 
-@dp.callback_query_handler(lambda cb: re.match(r"cb_choose_shop(\d+)", cb.data), state=FSM.create_package)
+@dp.callback_query_handler(
+    lambda cb: re.match(r"cb_choose_shop(\d+)", cb.data), state=FSM.create_package
+)
 async def handle_callback_choose_shop_n(call: types.CallbackQuery, state: FSMContext):
     # FIXME: ugly
     async with state.proxy() as data:
@@ -304,23 +323,27 @@ async def handle_callback_choose_shop_n(call: types.CallbackQuery, state: FSMCon
         msg = [f"{i+1}. {addresses[i]}" for i in range(len(addresses))]
         msg = f"Выберите адрес <b>{shop_name}</b>:\n\n" + "\n".join(msg)
 
-        markup = IKM(row_width=len(addresses)) # FIXME XXX: change pages; 5
+        markup = IKM(row_width=len(addresses))  # FIXME XXX: change pages; 5
 
-        buttons = [IKB(f"{i+1}", callback_data=f"cb_choose_address{i}") for i in range(len(addresses))]
+        buttons = [
+            IKB(f"{i+1}", callback_data=f"cb_choose_address{i}")
+            for i in range(len(addresses))
+        ]
 
         markup.add(*buttons)
         markup.add(IKB("Назад", callback_data="cb_my_shops"))
 
         await bot.edit_message_text(
-                msg,
-                call.message.chat.id,
-                call.message.message_id,
-                reply_markup=markup
-                )
+            msg, call.message.chat.id, call.message.message_id, reply_markup=markup
+        )
 
 
-@dp.callback_query_handler(lambda cb: re.match(r"cb_choose_address(\d+)", cb.data), state=FSM.create_package)
-async def handle_callback_choose_address_n(call: types.CallbackQuery, state: FSMContext):
+@dp.callback_query_handler(
+    lambda cb: re.match(r"cb_choose_address(\d+)", cb.data), state=FSM.create_package
+)
+async def handle_callback_choose_address_n(
+    call: types.CallbackQuery, state: FSMContext
+):
     async with state.proxy() as data:
         address_index = int(re.findall(r"cb_choose_address(\d+)", call.data)[0])
 
@@ -332,11 +355,11 @@ async def handle_callback_choose_address_n(call: types.CallbackQuery, state: FSM
         data["address"] = address
 
         await bot.edit_message_text(
-                "Введите описание пакета:",
-                call.message.chat.id,
-                call.message.message_id,
-                reply_markup=None
-                )
+            "Введите описание пакета:",
+            call.message.chat.id,
+            call.message.message_id,
+            reply_markup=None,
+        )
 
         # ??? will it share data with the previous state ??? FIXME
         await FSM.input_description.set()
@@ -347,7 +370,9 @@ async def input_description(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data["description"] = message.text
 
-    await bot.send_message(message.chat.id, "Введите время, до которого нужно забрать пакет:")
+    await bot.send_message(
+        message.chat.id, "Введите время, до которого нужно забрать пакет:"
+    )
     await FSM.input_time.set()
 
 
@@ -372,7 +397,7 @@ async def input_number_of_packages(message: types.Message, state: FSMContext):
 @dp.message_handler(state=FSM.input_price)
 async def input_price(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
-        data["price"] = int(message.text) # FIXME error handle of course everywhere
+        data["price"] = int(message.text)  # FIXME error handle of course everywhere
 
         # FIXME: DRY; copied from __str__ of package
         msg = f"""<b>Магазин</b>: {data["shop_name"]}
@@ -386,9 +411,9 @@ async def input_price(message: types.Message, state: FSMContext):
 
     markup = IKM(row_width=2)
     markup.add(
-            IKB("✅ Подтвердить", callback_data="cb_confirm"),
-            IKB("🚫 Отмена", callback_data="cb_cancel")
-            )
+        IKB("✅ Подтвердить", callback_data="cb_confirm"),
+        IKB("🚫 Отмена", callback_data="cb_cancel"),
+    )
 
     await bot.send_message(message.chat.id, msg, reply_markup=markup)
     await FSM.final.set()
@@ -397,15 +422,23 @@ async def input_price(message: types.Message, state: FSMContext):
 @dp.callback_query_handler(lambda cb: cb.data == "cb_confirm", state=FSM.final)
 async def handle_callback_confirm(call: types.CallbackQuery, state: FSMContext):
     await bot.edit_message_text(
-            "✅ " + call.message.text,
-            call.message.chat.id,
-            call.message.message_id,
-            reply_markup=None
-            )
+        "✅ " + call.message.text,
+        call.message.chat.id,
+        call.message.message_id,
+        reply_markup=None,
+    )
 
     from SnackSack.database.package import Package
+
     async with state.proxy() as data:
-        created_package = Package(data["shop_name"], data["address"], data["description"], data["time"], data["number_of_packages"], data["price"])
+        created_package = Package(
+            data["shop_name"],
+            data["address"],
+            data["description"],
+            data["time"],
+            data["number_of_packages"],
+            data["price"],
+        )
 
         db["package"].records.append(created_package.to_json())
         db["package"].update_file()
@@ -416,11 +449,11 @@ async def handle_callback_confirm(call: types.CallbackQuery, state: FSMContext):
 @dp.callback_query_handler(lambda cb: cb.data == "cb_cancel", state=FSM.final)
 async def handle_callback_cancel(call: types.CallbackQuery, state: FSMContext):
     await bot.edit_message_text(
-            "🚫 " + call.message.text,
-            call.message.chat.id,
-            call.message.message_id,
-            reply_markup=None
-            )
+        "🚫 " + call.message.text,
+        call.message.chat.id,
+        call.message.message_id,
+        reply_markup=None,
+    )
     await state.finish()
     # TODO: show menu or something
 
