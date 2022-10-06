@@ -1,11 +1,10 @@
-from SnackSack import dp, db, bot
-from SnackSack.messages import MSG
-
 from aiogram import types
-
-from SnackSack.config import PAYMENT_TOKEN
 from aiogram.types import ShippingOption, ShippingQuery, LabeledPrice, PreCheckoutQuery
 from aiogram.types.message import ContentType
+
+from SnackSack import dp, db, bot
+from SnackSack.messages import MSG
+from SnackSack.config import PAYMENT_TOKEN
 
 
 class Product:

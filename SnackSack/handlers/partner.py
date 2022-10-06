@@ -1,17 +1,14 @@
-from SnackSack import dp, db, bot
-from SnackSack.messages import MSG
-
-from SnackSack.database.partner import Partner
+import re
 
 from aiogram import types
-
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
-
 from aiogram.types.inline_keyboard import InlineKeyboardButton as IKB
 from aiogram.types.inline_keyboard import InlineKeyboardMarkup as IKM
 
-import re
+from SnackSack import dp, db, bot
+from SnackSack.messages import MSG
+from SnackSack.database.partner import Partner
 
 
 class FSM(StatesGroup):

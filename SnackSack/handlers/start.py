@@ -1,14 +1,11 @@
+from aiogram import types
+from aiogram.types.reply_keyboard import KeyboardButton as KB
+from aiogram.types.reply_keyboard import ReplyKeyboardMarkup as RKB
+from aiogram.dispatcher import FSMContext
+
 from SnackSack import dp
 from SnackSack.messages import MSG
 
-from aiogram import types
-
-from aiogram.types.reply_keyboard import KeyboardButton as KB
-from aiogram.types.reply_keyboard import ReplyKeyboardMarkup as RKB
-
-from aiogram.dispatcher import FSMContext
-
-# TODO: fix import order: 1) stdlibs 2) 3rd party packages 3) local packages
 
 client_button = KB(text=MSG.CLIENT_BTN)
 partner_button = KB(text=MSG.PARTNER_BTN)
