@@ -1,0 +1,170 @@
+[
+    {
+        "chat_id": 123,
+        "uuid": "0a5996a6-2bc7-49b4-8d78-62e26ef23cb9",
+        "stores": [
+            "Demo store 1",
+            "Demo store 2"
+        ],
+        "addresses": [
+            {
+                "store": "Demo store 1",
+                "address": "Demo address 1"
+            },
+            {
+                "store": "Demo store 1",
+                "address": "Demo address 2"
+            },
+            {
+                "store": "Demo store 2",
+                "address": "Demo address 3"
+            }
+        ],
+        "orders": [],
+        "packages": [
+            "demo-package-uuid-1",
+            "demo-package-uuid-2",
+            "demo-package-uuid-3"
+        ]
+    },
+    {
+        "chat_id": 401632257,
+        "uuid": "e9d093e6-db91-45c3-87ab-9a0798c22d1d",
+        "stores": [
+            "Demo store 1",
+            "Demo store 2"
+        ],
+        "addresses": [
+            {
+                "store": "Demo store 1",
+                "address": "Demo address 1"
+            },
+            {
+                "store": "Demo store 1",
+                "address": "Demo address 2"
+            },
+            {
+                "store": "Demo store 2",
+                "address": "Demo address 3"
+            }
+        ],
+        "packages": [
+            "demo-package-uuid-1",
+            "demo-package-uuid-2",
+            "demo-package-uuid-3"
+        ],
+        "orders": []
+    },
+    {
+        "chat_id": 902105028,
+        "uuid": "6b1844eb-7261-4d37-b8ad-5d384e3aec92",
+        "stores": [
+            "Demo store 1",
+            "Demo store 2"
+        ],
+        "addresses": [
+            {
+                "store": "Demo store 1",
+                "address": "Demo address 1"
+            },
+            {
+                "store": "Demo store 1",
+                "address": "Demo address 2"
+            },
+            {
+                "store": "Demo store 2",
+                "address": "Demo address 3"
+            }
+        ],
+        "packages": [
+            "demo-package-uuid-1",
+            "demo-package-uuid-2",
+            "demo-package-uuid-3"
+        ],
+        "orders": []
+    },
+    {
+        "chat_id": 5332077893,
+        "uuid": "977dd726-b264-4712-b139-dfd49a7f6b43",
+        "stores": [
+            "Demo store 1",
+            "Demo store 2"
+        ],
+        "addresses": [
+            {
+                "store": "Demo store 1",
+                "address": "Demo address 1"
+            },
+            {
+                "store": "Demo store 1",
+                "address": "Demo address 2"
+            },
+            {
+                "store": "Demo store 2",
+                "address": "Demo address 3"
+            }
+        ],
+        "packages": [
+            "demo-package-uuid-1",
+            "demo-package-uuid-2",
+            "demo-package-uuid-3"
+        ],
+        "orders": []
+    },
+    {
+        "chat_id": 430094654,
+        "uuid": "dcb9b372-8d51-450a-8b13-ad7ab36414c4",
+        "stores": [
+            "Demo store 1",
+            "Demo store 2"
+        ],
+        "addresses": [
+            {
+                "store": "Demo store 1",
+                "address": "Demo address 1"
+            },
+            {
+                "store": "Demo store 1",
+                "address": "Demo address 2"
+            },
+            {
+                "store": "Demo store 2",
+                "address": "Demo address 3"
+            }
+        ],
+        "packages": [
+            "demo-package-uuid-1",
+            "demo-package-uuid-2",
+            "demo-package-uuid-3"
+        ],
+        "orders": []
+    },
+    {
+        "chat_id": 368234011,
+        "uuid": "119bbd97-f758-4013-97a9-da1166907f49",
+        "stores": [
+            "Demo store 1",
+            "Demo store 2"
+        ],
+        "addresses": [
+            {
+                "store": "Demo store 1",
+                "address": "Demo address 1"
+            },
+            {
+                "store": "Demo store 1",
+                "address": "Demo address 2"
+            },
+            {
+                "store": "Demo store 2",
+                "address": "Demo address 3"
+            }
+        ],
+        "packages": [
+            "demo-package-uuid-1",
+            "demo-package-uuid-2",
+            "demo-package-uuid-3"
+        ],
+        "orders": []
+    }
+]
