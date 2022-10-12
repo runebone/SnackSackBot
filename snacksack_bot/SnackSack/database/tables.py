@@ -64,17 +64,20 @@ class Addresses():
 
     id_ = _Field(table, "id", UUID)
     store_id = _Field(table, "store_id", UUID)
+    address = _Field(table, "address", str)
 
     class Record(_BaseRecord):
-        def __init__(self, id_: UUID, store_id: UUID):
+        def __init__(self, id_: UUID, store_id: UUID, address: str):
             self.id = id_
             self.store_id = store_id
+            self.address = address
 
         @classmethod
         def create_from_dict(cls, dict_: dict):
             return cls(
                 id_=dict_["id"],
                 store_id=dict_["store_id"],
+                address=dict_["address"],
             )
 
 

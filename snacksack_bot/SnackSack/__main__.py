@@ -11,6 +11,7 @@ async def on_startup(_):
     await DBS.init()
 
     modules.client.setup_handlers(dp)
+    modules.partner.setup_handlers(dp)
 
 
 async def on_shutdown(_):

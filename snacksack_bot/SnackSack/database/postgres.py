@@ -52,18 +52,21 @@ class PostgresDB(BaseDB):
         addresses_ids_sql_query = SqlQuery(
             f"""
         SELECT * FROM {PartnerAddresses.table}
-        WHERE {PartnerAddresses.partner_id} = {chat_id}
-        """
+        WHERE {PartnerAddresses.partner_id} = :chat_id
+        """,
+        chat_id=chat_id
         )
 
-        partner_addresses_ids = await self.fetch(addresses_ids_sql_query)
-
-        partner_addresses = list(
+        partner_addresses_ids = list(
             map(
-                lambda x: await self.get_by_id(Addresses, x),
-                partner_addresses_ids,
+                lambda x: PartnerAddresses.Record.create_from_dict(x),
+                await self.fetch(addresses_ids_sql_query)
             )
         )
+
+        partner_addresses = [
+            await self.get_by_id(Addresses, x.address_id) for x in partner_addresses_ids
+        ]
 
         return partner_addresses
 
@@ -71,18 +74,21 @@ class PostgresDB(BaseDB):
         packages_ids_sql_query = SqlQuery(
             f"""
         SELECT * FROM {PartnerPackages.table}
-        WHERE {PartnerPackages.partner_id} = {chat_id}
-        """
+        WHERE {PartnerPackages.partner_id} = :chat_id
+        """,
+        chat_id=chat_id
         )
 
-        partner_packages_ids = await self.fetch(packages_ids_sql_query)
-
-        partner_packages = list(
+        partner_packages_ids = list(
             map(
-                lambda x: await self.get_by_id(Packages, x),
-                partner_packages_ids,
+                lambda x: PartnerPackages.Record.create_from_dict(x),
+                await self.fetch(packages_ids_sql_query)
             )
         )
+
+        partner_packages = [
+            await self.get_by_id(Packages, x.package_id) for x in partner_packages_ids
+        ]
 
         return partner_packages
 
@@ -90,18 +96,21 @@ class PostgresDB(BaseDB):
         orders_ids_sql_query = SqlQuery(
             f"""
         SELECT * FROM {PartnerOrders.table}
-        WHERE {PartnerOrders.partner_id} = {chat_id}
-        """
+        WHERE {PartnerOrders.partner_id} = :chat_id
+        """,
+        chat_id=chat_id
         )
 
-        partner_orders_ids = await self.fetch(orders_ids_sql_query)
-
-        partner_orders = list(
+        partner_orders_ids = list(
             map(
-                lambda x: await self.get_by_id(Orders, x),
-                partner_orders_ids,
+                lambda x: PartnerOrders.Record.create_from_dict(x),
+                await self.fetch(orders_ids_sql_query)
             )
         )
+
+        partner_orders = [
+            await self.get_by_id(Orders, x.order_id) for x in partner_orders_ids
+        ]
 
         return partner_orders
 
@@ -110,13 +119,16 @@ class PostgresDB(BaseDB):
 
         sql_query = SqlQuery(
             f"""
-        SELECT 1 FROM {type_.table}
-        WHERE {type_.id_} = {id_}
-        """
+        SELECT * FROM {type_.table}
+        WHERE {type_.id_} = :id_
+        """,
+        id_=id_
         )
 
+        fetched_record = (await self.fetch(sql_query))[0]
+
         record = type_.Record.create_from_dict(
-            await self.fetch(sql_query)
+            fetched_record
         )
 
         return record
@@ -125,8 +137,9 @@ class PostgresDB(BaseDB):
         sql_query = SqlQuery(
             f"""
         SELECT * FROM {OrderPackages.table}
-        WHERE {Orders.id_} = {order_id}
-        """
+        WHERE {Orders.id_} = :order_id
+        """,
+        order_id=order_id
         )
 
         order_packages = list(
@@ -137,3 +150,155 @@ class PostgresDB(BaseDB):
         )
 
         return order_packages
+
+    async def create_partner(self, chat_id: int):
+        sql_query = SqlQuery(
+            f"""
+        INSERT INTO {Partners.table} ({Partners.chat_id})
+        VALUES (:chat_id)
+        """,
+        chat_id=chat_id
+        )
+
+        # TODO: log; catch errors
+        await self.execute(sql_query)
+
+    async def create_store(self, record: Stores.Record):
+        # INSERT INTO:
+        # -> stores
+        sql_query = SqlQuery(
+            f"""
+        INSERT INTO {Stores.table} ({Stores.id_}, {Stores.name})
+        VALUES (:record_id, :record_name)
+        """,
+        record_id=record.id,
+        record_name=record.name
+        )
+
+        # TODO: log; catch errors
+        await self.execute(sql_query)
+
+    async def create_address(self, partner_chat_id: int, record: Addresses.Record):
+        # INSERT INTO:
+        # -> addresses
+        # -> partner_addresses
+        sql_query = SqlQuery(
+            f"""
+        INSERT INTO {Addresses.table}
+        ({Addresses.id_}, {Addresses.store_id}, {Addresses.address})
+        VALUES (:record_id, :record_store_id, :record_address)
+        """,
+        record_id=record.id,
+        record_store_id=record.store_id,
+        record_address=record.address
+        )
+
+        # TODO: log; catch errors
+        await self.execute(sql_query)
+
+        sql_query = SqlQuery(
+            f"""
+        INSERT INTO {PartnerAddresses.table}
+        ({PartnerAddresses.partner_id}, {PartnerAddresses.address_id})
+        VALUES (:partner_chat_id, :record_id)
+        """,
+        partner_chat_id=partner_chat_id,
+        record_id=record.id
+        )
+
+        # TODO: log; catch errors
+        await self.execute(sql_query)
+
+    async def create_package(self, partner_chat_id: int, record: Packages.Record):
+        # INSERT INTO:
+        # -> packages
+        # -> partner_packages
+        sql_query = SqlQuery(
+            f"""
+        INSERT INTO {Packages.table}
+        ({Packages.id_}, {Packages.address_id}, {Packages.description}, {Packages.pickup_before}, {Packages.amount})
+        VALUES (:record_id, :record_address_id, :record_description, :record_pickup_before, :record_amount)
+        """,
+        record_id=record.id,
+        record_address_id=record.address_id,
+        record_description=record.description,
+        record_pickup_before=record.pickup_before,
+        record_amount=record.amount
+        )
+
+        # TODO: log; catch errors
+        await self.execute(sql_query)
+
+        sql_query = SqlQuery(
+            f"""
+        INSERT INTO {PartnerPackages.table}
+        ({PartnerPackages.partner_id}, {PartnerPackages.package_id})
+        VALUES (:partner_chat_id, :record_id)
+        """,
+        partner_chat_id=partner_chat_id,
+        record_id=record.id
+        )
+
+        # TODO: log; catch errors
+        await self.execute(sql_query)
+
+    async def create_order(self, record: Orders.Record, packages: list[Packages.Record]):
+        # INSERT INTO:
+        # -> orders
+        # -> order_packages
+        # -> partner_orders
+        sql_query = SqlQuery(
+            f"""
+        INSERT INTO {Orders.table} ({Orders.id_}) VALUES (:record_id)
+        """,
+        record_id=record.id
+        )
+
+        # TODO: log; catch errors
+        await self.execute(sql_query)
+
+        for package in packages:
+            sql_query = SqlQuery(
+                f"""
+            INSERT INTO {OrderPackages.table}
+            ({OrderPackages.order_id}, {OrderPackages.package_id})
+            VALUES (:record_id, :package_id)
+            """,
+            record_id=record.id,
+            package_id=package.id
+            )
+
+            # TODO: log; catch errors
+            await self.execute(sql_query)
+
+            # FIXME consider we always only have one package per order, so
+            partner = await self.get_partner_by_package(package)
+
+            sql_query = SqlQuery(
+                f"""
+            INSERT INTO {PartnerOrders.table}
+            ({PartnerOrders.partner_id}, {PartnerOrders.order_id})
+            VALUES (:partner_chat_id, :record_id)
+            """,
+            partner_chat_id=partner.chat_id,
+            record_id=record.id
+            )
+
+            # TODO: log; catch errors
+            await self.execute(sql_query)
+
+            break # (watch FIXME above)
+
+
+    async def get_partner_by_package(self, package: Packages.Record) -> Partners.Record:
+        sql_query = SqlQuery(
+            f"""
+        SELECT * FROM {PartnerPackages.table}
+        WHERE {PartnerPackages.package_id} = :package_id
+        """,
+        package_id=package.id
+        )
+
+        partner = Partners.Record.create_from_dict(await self.fetch(sql_query))
+
+        return partner

@@ -12,3 +12,12 @@ class Error(Exception):
 
 class NoPackages(Error):
     pass
+
+class PartnerNoPackages(Error):
+    pass
+
+class PartnerNoStores(Error):
+    pass
+
+class PartnerNoAddresses(Error):
+    pass
