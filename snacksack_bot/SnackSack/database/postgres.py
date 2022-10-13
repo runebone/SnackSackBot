@@ -216,14 +216,15 @@ class PostgresDB(BaseDB):
         sql_query = SqlQuery(
             f"""
         INSERT INTO {Packages.table}
-        ({Packages.id_}, {Packages.address_id}, {Packages.description}, {Packages.pickup_before}, {Packages.amount})
-        VALUES (:record_id, :record_address_id, :record_description, :record_pickup_before, :record_amount)
+        ({Packages.id_}, {Packages.address_id}, {Packages.description}, {Packages.pickup_before}, {Packages.amount}, {Packages.price})
+        VALUES (:record_id, :record_address_id, :record_description, :record_pickup_before, :record_amount, :record_price)
         """,
         record_id=record.id,
         record_address_id=record.address_id,
         record_description=record.description,
         record_pickup_before=record.pickup_before,
-        record_amount=record.amount
+        record_amount=record.amount,
+        record_price=record.price
         )
 
         # TODO: log; catch errors

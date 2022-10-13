@@ -16,6 +16,8 @@ class RU:
 Осталось пакетов: {package.amount}\
 "
 
+    FMT_ADDRESS = "{index}. {address.address}"
+
     FMT_YOU_HAVE_CHOSEN = "<b>Вы выбрали: {index}</b>\n\
 Описание: {package.description}\n\
 Забрать до: {package.pickup_before}\n\

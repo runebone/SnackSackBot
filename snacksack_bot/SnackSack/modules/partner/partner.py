@@ -98,21 +98,24 @@ async def demo_register_partner(call: CallbackQuery):
             demo_addresses[0].id,
             f"Demo package 1 description ({random_id})",
             datetime.datetime(now.year, now.month, now.day, 21, 0),
-            1
+            1,
+            300
         ),
         t.Packages.Record(
             uuid.uuid4(),
             demo_addresses[1].id,
             f"Demo package 2 description ({random_id})",
             datetime.datetime(now.year, now.month, now.day, 22, 0),
-            2
+            2,
+            200
         ),
         t.Packages.Record(
             uuid.uuid4(),
             demo_addresses[2].id,
             f"Demo package 3 description ({random_id})",
             datetime.datetime(now.year, now.month, now.day, 23, 0),
-            3
+            3,
+            100
         )
     ]
 
@@ -120,6 +123,7 @@ async def demo_register_partner(call: CallbackQuery):
         await db.create_package(call.message.chat.id, package)
 
     await call.message.answer("✅ Вы успешно зарегистрированы в качестве партнёра.")
+    await send_partner_menu(call.message.chat.id, "Меню:") # TODO -> MESSAGE
 
 # XXX mostly copy-pasted from prev version
 async def demo_cancel_register_partner(call: CallbackQuery):

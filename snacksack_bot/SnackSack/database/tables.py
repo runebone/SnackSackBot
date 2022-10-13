@@ -89,6 +89,7 @@ class Packages():
     description = _Field(table, "description", str)
     pickup_before = _Field(table, "pickup_before", datetime)
     amount = _Field(table, "amount", int)
+    price = _Field(table, "price", int)
 
     class Record(_BaseRecord):
         def __init__(
@@ -98,12 +99,14 @@ class Packages():
             description: str,
             pickup_before: datetime,
             amount: int,
+            price: int,
         ):
             self.id = id_
             self.address_id = address_id
             self.description = description
             self.pickup_before = pickup_before
             self.amount = amount
+            self.price = price
 
         @classmethod
         def create_from_dict(cls, dict_: dict):
@@ -113,6 +116,7 @@ class Packages():
                 description=dict_["description"],
                 pickup_before=dict_["pickup_before"],
                 amount=dict_["amount"],
+                price=dict_["price"],
             )
 
 

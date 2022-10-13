@@ -29,6 +29,8 @@ AM = ArrowsMarkup(
 class FSM(StatesGroup):
     c_choose_package = State()
 
+# TODO: use this function instead
+from SnackSack.modules.utils import get_data_to_show_in_message
 
 # Message handlers
 async def client(message: Message):

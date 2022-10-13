@@ -1,11 +1,12 @@
 from aiogram import Dispatcher
 from aiogram.types.inline_keyboard import InlineKeyboardButton as IKB
 from aiogram.types.inline_keyboard import InlineKeyboardMarkup as IKM
+from SnackSack.database.tables import Stores, Addresses, Orders, Packages
 
 from SnackSack.messages import MSG
 
 MAX_NUMBER_OF_ELEMENTS_ON_A_PAGE = 5
-N = 5
+N = MAX_NUMBER_OF_ELEMENTS_ON_A_PAGE
 
 def state_proxy(dp: Dispatcher):
     return dp.current_state().proxy()
@@ -43,7 +44,7 @@ class ArrowsMarkup:
         buttons = []
         for i in range(start_index, start_index + number_of_elements_on_a_page):
             buttons.append(
-                IKB(f"{i+1}", callback_data=self.fmt_cb_choose_index.format(index=i+1))
+                IKB(f"{i+1}", callback_data=self.fmt_cb_choose_index.format(index=i+1)) # TODO: index=i
             )
         markup.add(*buttons)
 
@@ -123,3 +124,29 @@ class ArrowsMarkup:
             n,
             max_number_of_elements_on_a_page
         )
+
+
+def get_data_to_show_in_message(
+        page_number: int,
+        records: list,
+            #[
+            # Addresses.Record | Stores.Record | Orders.Record | Packages.Record
+            # ],
+        max_records_on_page: int = 5
+    ) -> list[dict]:
+
+    pn = page_number
+    N = max_records_on_page
+
+    i = 1
+    dict_list = []
+    for record in records[N * (pn - 1) : N * pn]:
+        dict_list.append(
+            {
+                "index": N * (pn - 1) + i,
+                "record": record
+            }
+        )
+        i += 1
+
+    return dict_list
