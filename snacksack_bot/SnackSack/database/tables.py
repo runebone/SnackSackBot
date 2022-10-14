@@ -119,6 +119,12 @@ class Packages():
                 price=dict_["price"],
             )
 
+        @property
+        def time(self):
+            dt = str(self.pickup_before)
+            HHmm_time = dt.split()[1][:-3]
+            return HHmm_time
+
 
 class Orders():
     table = _Table("orders")

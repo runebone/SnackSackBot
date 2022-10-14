@@ -12,7 +12,17 @@ class RU:
 
     FMT_PACKAGE = "{index}.\n\
 Описание: {package.description}\n\
-Забрать до: {package.pickup_before}\n\
+Цена одного пакета: {package.price}\n\
+Забрать до: {package.time}\n\
+Осталось пакетов: {package.amount}\
+"
+
+    FMT_PACKAGE_FULL = "{index}.\n\
+Магазин: {store.name}\n\
+Адрес: {address.address}\n\
+Описание: {package.description}\n\
+Цена одного пакета: {package.price}\n\
+Забрать до: {package.time}\n\
 Осталось пакетов: {package.amount}\
 "
 
@@ -20,7 +30,7 @@ class RU:
 
     FMT_YOU_HAVE_CHOSEN = "<b>Вы выбрали: {index}</b>\n\
 Описание: {package.description}\n\
-Забрать до: {package.pickup_before}\n\
+Забрать до: {package.time}\n\
 Осталось пакетов: {package.amount}\
 " # FIXME: DRY
 

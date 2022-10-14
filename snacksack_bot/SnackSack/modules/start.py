@@ -1,4 +1,5 @@
 from aiogram import types
+from aiogram import Dispatcher
 from aiogram.types.reply_keyboard import KeyboardButton as KB
 from aiogram.types.reply_keyboard import ReplyKeyboardMarkup as RKM
 from aiogram.dispatcher import FSMContext
@@ -28,4 +29,5 @@ async def handle_start_cmd(message: types.Message, state: FSMContext):
 
 
 # Registering handlers
-dp.register_message_handler(handle_start_cmd, commands=["start"], state="*")
+def setup_handlers(dp: Dispatcher):
+    dp.register_message_handler(handle_start_cmd, commands=["start"], state="*")

@@ -14,7 +14,8 @@ CREATE TABLE IF NOT EXISTS packages (
     address_id    UUID REFERENCES addresses(id) NOT NULL,
     description   VARCHAR(255)                  NOT NULL,
     pickup_before TIMESTAMP                     NOT NULL,
-    amount        INT                           NOT NULL
+    amount        INT                           NOT NULL,
+    price         INT                           NOT NULL
     );
 
 CREATE TABLE IF NOT EXISTS orders (

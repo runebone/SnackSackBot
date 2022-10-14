@@ -30,7 +30,7 @@ AM = ArrowsMarkup(
     "cb_back_to_stores", # FIXME DRY
     "cb_prev_page",
     "cb_next_page",
-    "cb_store" # FIXME DRY
+    "cb_address" # FIXME DRY
 )
 
 
@@ -142,6 +142,12 @@ async def create_address(call: CallbackQuery, state: FSMContext):
     await choose_nth_store_address(call, state)
     await call.answer(f"Создан случайный адрес: {address.address}")
 
+# TODO
+async def choose_address(call: CallbackQuery, state: FSMContext):
+    async with state.proxy() as storage:
+        # 1) Show address with Back / Delete address markup
+        pass
+
 
 # Helpers
 def get_message_with_addresses(page_number: int, addresses: list[Addresses.Record]) -> str:
@@ -198,3 +204,7 @@ def setup_handlers(dp: Dispatcher):
 
     filter_ = lambda cb: cb.data == "cb_prev_page" # FIXME: hardcode, very complex logic
     dp.register_callback_query_handler(prev_page, filter_, state=FSM.p_choose_address)
+
+    # TODO
+    filter_ = lambda cb: re.match(r"cb_address(\d+)", cb.data) # FIXME hardcode
+    dp.register_callback_query_handler(choose_address, filter_, state=FSM.p_choose_address)

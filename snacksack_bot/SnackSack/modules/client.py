@@ -1,4 +1,5 @@
 import re
+import uuid
 
 from aiogram import Dispatcher
 from aiogram.types import Message, CallbackQuery
@@ -11,12 +12,13 @@ from SnackSack import dp, bot
 from SnackSack import DBS
 from SnackSack import error
 from SnackSack.messages import MSG
-from SnackSack.database.tables import Packages
+from SnackSack.database.tables import Packages, Stores, Addresses
 from SnackSack.modules.utils import state_proxy
 from SnackSack.modules.utils import ArrowsMarkup
+from SnackSack.modules.utils import get_data_to_show_in_message
 
 # TODO FIXME XXX: use choose_markup from utils
-MAX_N_OF_PACKAGES_ON_A_PAGE = 5
+# MAX_N_OF_PACKAGES_ON_A_PAGE = 5
 
 AM = ArrowsMarkup(
     "cb_back",
@@ -29,8 +31,6 @@ AM = ArrowsMarkup(
 class FSM(StatesGroup):
     c_choose_package = State()
 
-# TODO: use this function instead
-from SnackSack.modules.utils import get_data_to_show_in_message
 
 # Message handlers
 async def client(message: Message):
@@ -42,20 +42,35 @@ async def client(message: Message):
         await message.answer("Пока пакетов нет. 📭")
         raise error.NoPackages(message)
 
-    # markup = choose_markup(1, len(packages))
-    markup = AM.choose_markup(1, len(packages))
-    message_text = get_message_with_packages(1, packages)
-
-    packages_message = await message.answer(message_text, reply_markup=markup)
-
     await FSM.c_choose_package.set()
 
     async with state_proxy(dp) as storage:
         storage["packages"] = packages
         storage["current_page"] = 1
-        storage["packages_message"] = packages_message
+        storage["packages_message"] = None
         storage["chosen_package_index"] = None
         storage["chosen_package_message_id"] = None
+
+    await choose_package(message, dp.current_state())
+
+async def choose_package(message: Message, state: FSMContext):
+    async with state.proxy() as storage:
+        packages = storage["packages"]
+        current_page = storage["current_page"]
+
+        markup = AM.choose_markup(current_page, len(packages))
+        msg = await get_message_with_packages(current_page, packages)
+
+        if storage["packages_message"] is None: # FIXME useless attribute
+            packages_message = await message.answer(msg, reply_markup=markup)
+            storage["packages_message"] = packages_message
+        else: # FIXME aoaoao ugly if elses
+            await bot.edit_message_text(
+                msg,
+                message.chat.id,
+                message.message_id,
+                reply_markup=markup
+            )
 
 # Callback handlers
 async def back(call: CallbackQuery, state: FSMContext):
@@ -70,40 +85,17 @@ async def next_page(call: CallbackQuery, state: FSMContext):
     async with state.proxy() as storage:
         storage["current_page"] += 1
 
-        current_page = storage["current_page"]
-        packages = storage["packages"]
-
-        msg = get_message_with_packages(current_page, packages)
-        # markup = choose_markup(current_page, len(packages))
-        markup = AM.choose_markup(current_page, len(packages))
-
-        storage["packages_message"] = await bot.edit_message_text(
-            msg,
-            call.message.chat.id,
-            storage["packages_message"].message_id,
-            reply_markup=markup,
-        )
+    await choose_package(call.message, state)
 
 
 async def prev_page(call: CallbackQuery, state: FSMContext):
     async with state.proxy() as storage:
         storage["current_page"] -= 1
 
-        current_page = storage["current_page"]
-        packages = storage["packages"]
-
-        msg = get_message_with_packages(current_page, packages)
-        # markup = choose_markup(current_page, len(packages))
-        markup = AM.choose_markup(current_page, len(packages))
-
-        storage["packages_message"] = await bot.edit_message_text(
-            msg,
-            call.message.chat.id,
-            storage["packages_message"].message_id,
-            reply_markup=markup,
-        )
+    await choose_package(call.message, state)
 
 
+# FIXME ugly; make the same logic in every module and abstract it out
 async def choose_package_n(call: CallbackQuery, state: FSMContext):
     markup = M.confirm_cancel()
 
@@ -165,42 +157,41 @@ async def confirm_order(call: CallbackQuery, state: FSMContext):
         )
         # TODO: payment
         # TODO: update number of packages in database or delete package
+        # TODO: create order -> Orders; OrderPackages
     await state.finish()
 
 
 # Helpers
-# def choose_markup(page_number: int, number_of_packages: int) -> IKM:
-#     assert page_number > 0, "Invalid page number."
-#     assert number_of_packages >= 0, "Invalid number of packages."
 
-#     N = MAX_N_OF_PACKAGES_ON_A_PAGE
+async def get_message_with_packages(page_number: int, packages: list[Packages.Record]) -> str:
+    data = get_data_to_show_in_message(page_number, packages)
 
-#     # n - number of packages on a page
-#     n = min(N, number_of_packages - N * (page_number - 1))
+    db = await DBS.get_instance()
 
-#     if page_number == 1:
-#         if N < number_of_packages:
-#             return M.back_button_and_arrow_forward(n)
-#         return M.back_button(n)
-
-#     # page_number > 1
-#     if page_number * N < number_of_packages:
-#         return M.both_arrows_and_back_button(n)
-#     return M.arrow_back_and_back_button(n)
-
-
-def get_message_with_packages(page_number: int, packages: list[Packages.Record]) -> str:
-    i = 1
-    pn = page_number
+    # FIXME: log-level logic in high-level abstraction function
     message = []
-    N = MAX_N_OF_PACKAGES_ON_A_PAGE
-    for package in packages[N * (pn - 1) : N * pn]:
-        message.append(MSG.FMT_PACKAGE.format(index=(N * (pn - 1) + i), package=package))
-        i += 1
+    for d in data:
+        package = d["record"]
+        address = await db.get_by_id(Addresses, package.address_id)
+        store = await db.get_by_id(Stores, address.store_id)
+        message.append(MSG.FMT_PACKAGE_FULL.format(index=d["index"], package=package, address=address, store=store))
 
     message = "\n\n".join(message)
 
     return message
+
+# def get_message_with_packages(page_number: int, packages: list[Packages.Record]) -> str:
+#     i = 1
+#     pn = page_number
+#     message = []
+#     N = MAX_N_OF_PACKAGES_ON_A_PAGE
+#     for package in packages[N * (pn - 1) : N * pn]:
+#         message.append(MSG.FMT_PACKAGE.format(index=(N * (pn - 1) + i), package=package))
+#         i += 1
+
+#     message = "\n\n".join(message)
+
+#     return message
 
 
 # TODO: get most of markups from utils.M
