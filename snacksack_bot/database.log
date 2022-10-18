@@ -1,43 +1,55 @@
-2022-10-12 12:14:41,565 (INFO) - <Record ?column?=1>
-2022-10-12 12:14:41,565 (INFO) - ?column?: 1
-2022-10-12 12:14:41,565 (INFO) - <class 'asyncpg.Record'>
-2022-10-12 12:16:01,830 (INFO) - <Record ?column?=1>
-2022-10-12 12:16:01,830 (INFO) - ?column?:
-2022-10-12 12:16:01,830 (INFO) - - 1
-2022-10-12 12:16:01,830 (INFO) - <class 'asyncpg.Record'>
-2022-10-12 12:16:59,849 (INFO) - <Record id=UUID('15e28dac-8c61-438b-9cff-0918131dd295') address_id=UUID('797bc0f4-1433-486f-abe2-0b470bd920cc') description='Demo package 1 description (861fec21)' pickup_before=datetime.datetime(2022, 10, 12, 21, 0) amount=1>
-2022-10-12 12:16:59,849 (INFO) - id:
-2022-10-12 12:16:59,849 (INFO) - address_id:
-2022-10-12 12:16:59,849 (INFO) - description:
-2022-10-12 12:16:59,849 (INFO) - pickup_before:
-2022-10-12 12:16:59,849 (INFO) - amount:
-2022-10-12 12:16:59,850 (INFO) - - 15e28dac-8c61-438b-9cff-0918131dd295
-2022-10-12 12:16:59,850 (INFO) - - 797bc0f4-1433-486f-abe2-0b470bd920cc
-2022-10-12 12:16:59,850 (INFO) - - Demo package 1 description (861fec21)
-2022-10-12 12:16:59,850 (INFO) - - 2022-10-12 21:00:00
-2022-10-12 12:16:59,850 (INFO) - - 1
-2022-10-12 12:16:59,850 (INFO) - <class 'asyncpg.Record'>
-2022-10-12 12:16:59,851 (INFO) - <Record id=UUID('e737a179-5a3c-48bb-a43a-f94d338ef371') address_id=UUID('e524f516-0bf5-4acd-8748-d815c3c6bd0b') description='Demo package 2 description (861fec21)' pickup_before=datetime.datetime(2022, 10, 12, 22, 0) amount=2>
-2022-10-12 12:16:59,851 (INFO) - id:
-2022-10-12 12:16:59,851 (INFO) - address_id:
-2022-10-12 12:16:59,851 (INFO) - description:
-2022-10-12 12:16:59,851 (INFO) - pickup_before:
-2022-10-12 12:16:59,851 (INFO) - amount:
-2022-10-12 12:16:59,851 (INFO) - - e737a179-5a3c-48bb-a43a-f94d338ef371
-2022-10-12 12:16:59,851 (INFO) - - e524f516-0bf5-4acd-8748-d815c3c6bd0b
-2022-10-12 12:16:59,851 (INFO) - - Demo package 2 description (861fec21)
-2022-10-12 12:16:59,852 (INFO) - - 2022-10-12 22:00:00
-2022-10-12 12:16:59,852 (INFO) - - 2
-2022-10-12 12:16:59,852 (INFO) - <class 'asyncpg.Record'>
-2022-10-12 12:16:59,853 (INFO) - <Record id=UUID('fa66ab82-d3a8-4b76-b20c-fb8fb5e24b36') address_id=UUID('076e6d79-3ab4-4ff4-98c4-72fefaa6641b') description='Demo package 3 description (861fec21)' pickup_before=datetime.datetime(2022, 10, 12, 23, 0) amount=3>
-2022-10-12 12:16:59,853 (INFO) - id:
-2022-10-12 12:16:59,853 (INFO) - address_id:
-2022-10-12 12:16:59,853 (INFO) - description:
-2022-10-12 12:16:59,853 (INFO) - pickup_before:
-2022-10-12 12:16:59,853 (INFO) - amount:
-2022-10-12 12:16:59,853 (INFO) - - fa66ab82-d3a8-4b76-b20c-fb8fb5e24b36
-2022-10-12 12:16:59,853 (INFO) - - 076e6d79-3ab4-4ff4-98c4-72fefaa6641b
-2022-10-12 12:16:59,853 (INFO) - - Demo package 3 description (861fec21)
-2022-10-12 12:16:59,853 (INFO) - - 2022-10-12 23:00:00
-2022-10-12 12:16:59,853 (INFO) - - 3
-2022-10-12 12:16:59,853 (INFO) - <class 'asyncpg.Record'>
+2022-10-18 16:41:06,438 (INFO) - 💸
+Совершена покупка:
+- Номер заказа: 401632257-6209
+- Состав:
+id: facbf6bb-b9c2-4059-b044-55978f0b87a8
+address_id: 9845e86b-48d5-4cdb-81b2-44255e015f77
+description: Demo package 3 description (fe913dc8)
+pickup_before: 2022-10-17 23:00:00
+amount: 2
+price: 100
+time: 23:00
+2022-10-18 16:58:26,312 (INFO) - 💸
+Совершена покупка:
+- Номер заказа: 401632257-7911
+- Состав:
+id: d1a96b7e-7e48-42fd-8ac5-5f4d28681fea
+address_id: 8bc36da6-4001-442d-b02c-51f52419addf
+description: Demo package 2 description (fe913dc8)
+pickup_before: 2022-10-17 22:00:00
+amount: 0
+price: 200
+time: 22:00
+2022-10-18 16:58:38,158 (INFO) - 💸
+Совершена покупка:
+- Номер заказа: 401632257-7054
+- Состав:
+id: facbf6bb-b9c2-4059-b044-55978f0b87a8
+address_id: 9845e86b-48d5-4cdb-81b2-44255e015f77
+description: Demo package 3 description (fe913dc8)
+pickup_before: 2022-10-17 23:00:00
+amount: 1
+price: 100
+time: 23:00
+2022-10-18 21:09:05,205 (INFO) - 💸
+Совершена покупка:
+- Номер заказа: 401632257-4479
+- Состав:
+id: facbf6bb-b9c2-4059-b044-55978f0b87a8
+address_id: 9845e86b-48d5-4cdb-81b2-44255e015f77
+description: Demo package 3 description (fe913dc8)
+pickup_before: 2022-10-17 23:00:00
+amount: 0
+price: 100
+time: 23:00
+2022-10-18 21:09:17,435 (INFO) - 💸
+Совершена покупка:
+- Номер заказа: 401632257-8486
+- Состав:
+id: d1a96b7e-7e48-42fd-8ac5-5f4d28681fea
+address_id: 8bc36da6-4001-442d-b02c-51f52419addf
+description: Demo package 2 description (fe913dc8)
+pickup_before: 2022-10-17 22:00:00
+amount: 0
+price: 200
+time: 22:00

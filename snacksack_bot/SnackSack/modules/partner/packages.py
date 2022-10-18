@@ -1,3 +1,5 @@
+import re
+
 from aiogram import Dispatcher
 from aiogram.types import CallbackQuery
 from aiogram.dispatcher import FSMContext
@@ -18,7 +20,7 @@ from .back_to_menu import register_back_to_menu_handler_from_new_state
 from .back_to_menu import M as btmM
 
 from SnackSack.modules.utils import get_data_to_show_in_message
-from SnackSack.database.tables import Packages
+from SnackSack.database.tables import Packages, Addresses, Stores
 
 AM = ArrowsMarkup(
     "cb_back_to_menu", # FIXME DRY
@@ -100,11 +102,141 @@ async def prev_page(call: CallbackQuery, state: FSMContext):
         storage["current_page"] -= 1
     await choose_package(call, state)
 
+async def choose_package_n(call: CallbackQuery, state: FSMContext):
+    async with state.proxy() as storage:
+        match_ = re.findall(r"cb_choose(\d+)", call.data) # FIXME callback name hardcode aoaoaoao
+
+        if match_ != []:
+            n = int(match_[0])
+            i = n - 1
+            storage["chosen_package_index"] = i
+        else:
+            assert storage["chosen_package_index"] is not None
+            i = storage["chosen_package_index"]
+
+        package = storage["packages"][i]
+
+    # 1) Get back_to_packages markup
+    # 2) Create increment number of packages avaliable button
+    # 3) Create delete package button
+    markup = M.increase_decrease_delete_back()
+
+    msg = await get_message_with_full_package_info(i, package)
+
+    await bot.edit_message_text(
+            msg,
+            call.message.chat.id,
+            call.message.message_id,
+            reply_markup=markup
+            )
+
+async def back_to_packages(call: CallbackQuery, state: FSMContext):
+    await choose_package(call, state)
+
+
+async def delete_chosen_package(call: CallbackQuery, state: FSMContext):
+    await bot.edit_message_text(
+            f"{call.message.text}\n\nВы действительно хотите удалить пакет?", # TODO -> MESSAGE of course
+            call.message.chat.id,
+            call.message.message_id,
+            reply_markup=M.confirm_cancel_delete()
+            )
+
+async def confirm_delete(call: CallbackQuery, state: FSMContext):
+    db = await DBS.get_instance()
+
+    async with state.proxy() as storage:
+        i = storage["chosen_package_index"]
+        package = storage["packages"][i]
+
+    await db.delete_package(package.id)
+
+    await call.answer("Пакет успешно удалён. ✅")
+
+    await show_packages(call)
+
+async def cancel_delete(call: CallbackQuery, state: FSMContext):
+    await choose_package_n(call, state)
+
+async def increment_amount(call: CallbackQuery, state: FSMContext):
+    db = await DBS.get_instance()
+
+    async with state.proxy() as storage:
+        i = storage["chosen_package_index"]
+        package = storage["packages"][i]
+
+        storage["packages"][i] = await db.get_by_id(Packages, package.id)
+
+    await db.increment_package_amount(package.id)
+
+    async with state.proxy() as storage:
+        storage["packages"][i] = await db.get_by_id(Packages, package.id)
+
+    msg = await get_message_with_full_package_info(i, package)
+
+    await bot.edit_message_text(
+            msg,
+            call.message.chat.id,
+            call.message.message_id,
+            reply_markup=M.increase_decrease_delete_back()
+            )
+
+async def decrement_amount(call: CallbackQuery, state: FSMContext):
+    db = await DBS.get_instance()
+
+    async with state.proxy() as storage:
+        i = storage["chosen_package_index"]
+        package = storage["packages"][i]
+
+    await db.decrement_package_amount(package.id)
+
+    async with state.proxy() as storage:
+        storage["packages"][i] = await db.get_by_id(Packages, package.id)
+
+    msg = await get_message_with_full_package_info(i, package)
+
+    await bot.edit_message_text(
+            msg,
+            call.message.chat.id,
+            call.message.message_id,
+            reply_markup=M.increase_decrease_delete_back()
+            )
 
 # Helpers
 class M:
     """Markups class."""
-    pass
+    @staticmethod
+    def increase_decrease_delete_back():
+        markup = IKM(row_width=2)
+
+        # TODO -> MESSAGE; callbacks aoaoaoa
+        markup.add(
+                IKB("⬆️ Количество", callback_data="cb_increase_amount"),
+                IKB("⬇️ Количество", callback_data="cb_decrease_amount")
+                )
+
+        markup.add(
+                IKB("❌ Удалить", callback_data="cb_delete")
+                )
+
+
+        markup.add(
+                IKB("Назад", callback_data="cb_back_to_packages")
+                )
+
+        return markup
+
+    @staticmethod
+    def confirm_cancel_delete():
+        markup = IKM(row_width=2)
+
+        markup.add(
+                IKB("✅", callback_data="cb_confirm_delete"),
+                IKB("❌", callback_data="cb_cancel_delete")
+                )
+
+        return markup
+
 
 def get_message_with_packages(page_number: int, packages: list[Packages.Record]) -> str:
     data = get_data_to_show_in_message(page_number, packages)
@@ -116,6 +248,40 @@ def get_message_with_packages(page_number: int, packages: list[Packages.Record])
     message = "\n\n".join(message)
 
     return message
+
+# TODO -> utils
+async def get_full_package_info(package_: Packages.Record):
+    db = await DBS.get_instance()
+
+    # Needed to update changes in amount
+    package = await db.get_by_id(Packages, package_.id)
+    address = await db.get_by_id(Addresses, package.address_id)
+    store = await db.get_by_id(Stores, address.store_id)
+
+    result = {
+            "store": store,
+            "address": address,
+            "package": package
+            }
+
+    return result
+
+# TODO -> MESSAGE of course
+async def get_message_with_full_package_info(index: int, package: Packages.Record):
+    d = await get_full_package_info(package)
+
+    msg = MSG.FMT_PACKAGE_FULL.format(
+            index=index,
+            store=d["store"],
+            address=d["address"],
+            package=d["package"]
+            )
+
+    msg = msg.split('\n')
+    msg.pop(0)
+    msg = "\n".join(msg)
+
+    return "\n\n".join([f"Вы выбрали {index+1}.", msg])
 
 
 # Setup handlers
@@ -130,3 +296,24 @@ def setup_handlers(dp: Dispatcher):
 
     filter_ = lambda cb: cb.data == "cb_next_page"
     dp.register_callback_query_handler(next_page, filter_, state=FSM.p_choose_package)
+
+    filter_ = lambda cb: re.match(r"cb_choose(\d+)", cb.data)
+    dp.register_callback_query_handler(choose_package_n, filter_, state=FSM.p_choose_package)
+
+    filter_ = lambda cb: cb.data == "cb_back_to_packages"
+    dp.register_callback_query_handler(back_to_packages, filter_, state=FSM.p_choose_package)
+
+    filter_ = lambda cb: cb.data == "cb_delete"
+    dp.register_callback_query_handler(delete_chosen_package, filter_, state=FSM.p_choose_package)
+
+    filter_ = lambda cb: cb.data == "cb_cancel_delete"
+    dp.register_callback_query_handler(cancel_delete, filter_, state=FSM.p_choose_package)
+
+    filter_ = lambda cb: cb.data == "cb_confirm_delete"
+    dp.register_callback_query_handler(confirm_delete, filter_, state=FSM.p_choose_package)
+
+    filter_ = lambda cb: cb.data == "cb_increase_amount"
+    dp.register_callback_query_handler(increment_amount, filter_, state=FSM.p_choose_package)
+
+    filter_ = lambda cb: cb.data == "cb_decrease_amount"
+    dp.register_callback_query_handler(decrement_amount, filter_, state=FSM.p_choose_package)

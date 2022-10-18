@@ -333,3 +333,34 @@ class PostgresDB(BaseDB):
                 package_id=package_id
                 )
         await self.execute(sql_query)
+
+    async def increment_package_amount(self, package_id: UUID):
+        sql_query = SqlQuery(
+                f"""
+                UPDATE {Packages.table}
+                SET {Packages.amount} = {Packages.amount} + 1
+                WHERE {Packages.id_} = :package_id
+                """,
+                package_id=package_id
+                )
+        await self.execute(sql_query)
+
+    async def delete_order(self, order_id: UUID):
+        sql_query = SqlQuery(
+                f"""
+                DELETE FROM {Orders.table}
+                WHERE {Orders.id_} = :order_id
+                """,
+                order_id=order_id
+                )
+        await self.execute(sql_query)
+
+    async def delete_package(self, package_id: UUID):
+        sql_query = SqlQuery(
+                f"""
+                DELETE FROM {Packages.table}
+                WHERE {Packages.id_} = :package_id
+                """,
+                package_id=package_id
+                )
+        await self.execute(sql_query)

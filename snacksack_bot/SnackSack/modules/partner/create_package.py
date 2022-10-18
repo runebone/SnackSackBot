@@ -88,7 +88,7 @@ async def choose_store(call: CallbackQuery, state: FSMContext):
         # 1) Get store index from callback
         if storage["chosen_store_index"] == None:
             store_index = int(re.findall(r"store(\d+)", call.data)[0])
-            storage["chosen_store_index"] = store_index - 1 # DANGER - 1
+            storage["chosen_store_index"] = store_index #- 1 # DANGER - 1
 
     await pre_choose_address(call, state)
 
@@ -215,6 +215,9 @@ async def pre_input_price(call: CallbackQuery, state: FSMContext):
 async def input_price(message: Message, state: FSMContext):
     message_is_valid = bool(re.fullmatch(r"(\d+)", message.text.strip()))
 
+    if message_is_valid:
+        message_is_valid &= int(message.text.strip()) < 2 ** 32 # int32
+
     if not message_is_valid:
         await message.answer("Введите только цену, в рублях, цифрами:")
     else:
@@ -242,6 +245,9 @@ async def pre_input_amount(message: Message, state: FSMContext):
 
 async def input_amount(message: Message, state: FSMContext):
     message_is_valid = bool(re.fullmatch(r"(\d+)", message.text.strip()))
+
+    if message_is_valid:
+        message_is_valid &= int(message.text.strip()) < 2 ** 32 # int32
 
     if not message_is_valid:
         await message.answer("Введите количество, числом:")
