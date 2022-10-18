@@ -137,19 +137,25 @@ class PostgresDB(BaseDB):
         sql_query = SqlQuery(
             f"""
         SELECT * FROM {OrderPackages.table}
-        WHERE {Orders.id_} = :order_id
+        WHERE {OrderPackages.order_id} = :order_id
         """,
         order_id=order_id
         )
 
         order_packages = list(
             map(
-                lambda x: Packages.Record.create_from_dict(x),
-                await self.fetch(sql_query),
+                lambda x: OrderPackages.Record.create_from_dict(x),
+                await self.fetch(sql_query)
             )
         )
 
-        return order_packages
+        packages = []
+        for order_package in order_packages:
+            packages.append(
+                await self.get_by_id(Packages, order_package.package_id)
+            )
+
+        return packages
 
     async def create_partner(self, chat_id: int):
         sql_query = SqlQuery(
@@ -250,9 +256,12 @@ class PostgresDB(BaseDB):
         # -> partner_orders
         sql_query = SqlQuery(
             f"""
-        INSERT INTO {Orders.table} ({Orders.id_}) VALUES (:record_id)
+        INSERT INTO {Orders.table} ({Orders.id_}, {Orders.chat_id}, {Orders.random_number})
+        VALUES (:record_id, :record_chat_id, :random_number)
         """,
-        record_id=record.id
+        record_id=record.id,
+        record_chat_id=record.chat_id,
+        random_number=record.random_number
         )
 
         # TODO: log; catch errors
@@ -272,23 +281,21 @@ class PostgresDB(BaseDB):
             # TODO: log; catch errors
             await self.execute(sql_query)
 
-            # FIXME consider we always only have one package per order, so
-            partner = await self.get_partner_by_package(package)
+        # FIXME consider all packages belong to a single partner
+        partner = await self.get_partner_by_package(packages[0])
 
-            sql_query = SqlQuery(
-                f"""
-            INSERT INTO {PartnerOrders.table}
-            ({PartnerOrders.partner_id}, {PartnerOrders.order_id})
-            VALUES (:partner_chat_id, :record_id)
-            """,
-            partner_chat_id=partner.chat_id,
-            record_id=record.id
-            )
+        sql_query = SqlQuery(
+            f"""
+        INSERT INTO {PartnerOrders.table}
+        ({PartnerOrders.partner_id}, {PartnerOrders.order_id})
+        VALUES (:partner_chat_id, :record_id)
+        """,
+        partner_chat_id=partner.chat_id,
+        record_id=record.id
+        )
 
-            # TODO: log; catch errors
-            await self.execute(sql_query)
-
-            break # (watch FIXME above)
+        # TODO: log; catch errors
+        await self.execute(sql_query)
 
 
     async def get_partner_by_package(self, package: Packages.Record) -> Partners.Record:
@@ -300,6 +307,29 @@ class PostgresDB(BaseDB):
         package_id=package.id
         )
 
-        partner = Partners.Record.create_from_dict(await self.fetch(sql_query))
+        partner_package = PartnerPackages.Record.create_from_dict((await self.fetch(sql_query))[0])
+
+        partner_sql_query = SqlQuery(
+            f"""
+        SELECT * FROM {Partners.table}
+        WHERE {Partners.chat_id} = :partner_id
+        """,
+        partner_id=partner_package.partner_id
+        )
+
+        partner_dict = (await self.fetch(partner_sql_query))[0]
+
+        partner = Partners.Record.create_from_dict(partner_dict)
 
         return partner
+
+    async def decrement_package_amount(self, package_id: UUID):
+        sql_query = SqlQuery(
+                f"""
+                UPDATE {Packages.table}
+                SET {Packages.amount} = {Packages.amount} - 1
+                WHERE {Packages.id_} = :package_id
+                """,
+                package_id=package_id
+                )
+        await self.execute(sql_query)

@@ -1,5 +1,6 @@
 import re
 import uuid
+import random
 
 from aiogram import Dispatcher
 from aiogram.types import Message, CallbackQuery
@@ -12,7 +13,7 @@ from SnackSack import dp, bot
 from SnackSack import DBS
 from SnackSack import error
 from SnackSack.messages import MSG
-from SnackSack.database.tables import Packages, Stores, Addresses
+from SnackSack.database.tables import Packages, Stores, Addresses, Orders
 from SnackSack.modules.utils import state_proxy
 from SnackSack.modules.utils import ArrowsMarkup
 from SnackSack.modules.utils import get_data_to_show_in_message
@@ -36,6 +37,8 @@ class FSM(StatesGroup):
 async def client(message: Message):
     db = await DBS.get_instance()
     packages = await db.get_all_packages()
+
+    packages = list(filter(lambda x: x.amount > 0, packages))
 
     if len(packages) == 0:
         # TODO -> MESSAGE
@@ -155,10 +158,31 @@ async def confirm_order(call: CallbackQuery, state: FSMContext):
             storage["packages_message"].message_id,
             reply_markup=None,
         )
-        # TODO: payment
-        # TODO: update number of packages in database or delete package
-        # TODO: create order -> Orders; OrderPackages
+
+    await create_order(call, state)
+
+    # TODO (mb): payment
+
     await state.finish()
+
+async def create_order(call: CallbackQuery, state: FSMContext):
+    db = await DBS.get_instance()
+
+    random_number = get_random_number(4)
+
+    order = Orders.Record(uuid.uuid4(), call.message.chat.id, random_number)
+
+    async with state.proxy() as storage:
+        index = storage["chosen_package_index"]
+        package = storage["packages"][index]
+
+    await db.create_order(order, [package]) # FIXME only one package per order avaliable rn
+
+    await db.decrement_package_amount(package.id)
+
+    await call.answer("✅ Заказ успешно создан")
+
+    await call.message.answer(f"🧾 Номер заказа: `{call.message.chat.id}-{random_number}`", parse_mode="markdown")
 
 
 # Helpers
@@ -192,6 +216,10 @@ async def get_message_with_packages(page_number: int, packages: list[Packages.Re
 #     message = "\n\n".join(message)
 
 #     return message
+
+def get_random_number(number_of_digits: int) -> int:
+    n = number_of_digits
+    return random.randint(10 ** (n-1), 10 ** n)
 
 
 # TODO: get most of markups from utils.M

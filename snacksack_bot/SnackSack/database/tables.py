@@ -130,15 +130,21 @@ class Orders():
     table = _Table("orders")
 
     id_ = _Field(table, "id", UUID)
+    chat_id = _Field(table, "chat_id", int)
+    random_number = _Field(table, "random_number", int)
 
     class Record(_BaseRecord):
-        def __init__(self, id_: UUID):
+        def __init__(self, id_: UUID, chat_id: int, random_number: int):
             self.id = id_
+            self.chat_id = chat_id
+            self.random_number = random_number
 
         @classmethod
         def create_from_dict(cls, dict_: dict):
             return cls(
                 id_=dict_["id"],
+                chat_id=dict_["chat_id"],
+                random_number=dict_["random_number"],
             )
 
 

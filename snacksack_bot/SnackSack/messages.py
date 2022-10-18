@@ -17,6 +17,12 @@ class RU:
 Осталось пакетов: {package.amount}\
 "
 
+    FMT_ORDER_HEADER = "Заказ `{order_number}`:"
+    FMT_ORDER_BODY = "\
+Описание: {description}\n\
+Цена: {price}\
+            "
+
     FMT_PACKAGE_FULL = "{index}.\n\
 Магазин: {store.name}\n\
 Адрес: {address.address}\n\
@@ -37,7 +43,7 @@ class RU:
     EXITED_CHOOSE_PACKAGE_MODE = "ℹ️ Вы вышли из режима выбора пакета."
 
     BTN_CONFIRM = "✅ Подтвердить"
-    BTN_CANCEL = "🚫 Отмена"
+    BTN_CANCEL = "❌ Отмена"
 
     FMT_DEMO_INITIAL_PARNTER_MENU = "Добро пожаловать, {username}! ✨"
 

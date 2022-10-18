@@ -21,3 +21,6 @@ class PartnerNoStores(Error):
 
 class PartnerNoAddresses(Error):
     pass
+
+class PartnerNoOrders(Error):
+    pass

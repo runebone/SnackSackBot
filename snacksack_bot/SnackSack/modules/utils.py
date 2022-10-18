@@ -29,14 +29,18 @@ class M:
         return markup
 
 class ArrowsMarkup:
-    def __init__(self, cb_back: str, cb_arrow_back: str, cb_arrow_forward: str, cb_choose: str, row_width: int = N):
+    def __init__(self, cb_back: str, cb_arrow_back: str, cb_arrow_forward: str, cb_choose: str | None, with_number_buttons: bool = True, row_width: int = N):
         self.cb_back = cb_back
         self.cb_arrow_back = cb_arrow_back
         self.cb_arrow_forward = cb_arrow_forward
-        self.fmt_cb_choose_index = "".join([cb_choose, "{index}"])
+        self.with_number_buttons = with_number_buttons
+        self.fmt_cb_choose_index = "".join([cb_choose, "{index}"]) if cb_choose is not None else None
         self.row_width = row_width
 
     def _get_number_buttons_markup(self, page_number: int, number_of_elements_on_a_page: int, max_number_of_elements_on_a_page: int = N):
+        assert self.with_number_buttons, "aoaoao"
+        assert self.fmt_cb_choose_index is not None, "aoaooa" # FIXME oaoaoaoaoa
+
         markup = IKM(row_width=self.row_width)
 
         start_index = (page_number - 1) * max_number_of_elements_on_a_page
@@ -51,7 +55,10 @@ class ArrowsMarkup:
         return markup
 
     def back_button(self, page_number: int, number_of_elements_on_a_page: int, max_number_of_elements_on_a_page: int = N):
-        markup = self._get_number_buttons_markup(page_number, number_of_elements_on_a_page, max_number_of_elements_on_a_page)
+        if self.with_number_buttons:
+            markup = self._get_number_buttons_markup(page_number, number_of_elements_on_a_page, max_number_of_elements_on_a_page)
+        else:
+            markup = IKM(row_width=self.row_width)
 
         markup.add(
             IKB(MSG.BTN_BACK, callback_data=self.cb_back),
@@ -60,7 +67,10 @@ class ArrowsMarkup:
         return markup
 
     def back_button_and_arrow_forward(self, page_number: int, number_of_elements_on_a_page: int, max_number_of_elements_on_a_page: int = N):
-        markup = self._get_number_buttons_markup(page_number, number_of_elements_on_a_page, max_number_of_elements_on_a_page)
+        if self.with_number_buttons:
+            markup = self._get_number_buttons_markup(page_number, number_of_elements_on_a_page, max_number_of_elements_on_a_page)
+        else:
+            markup = IKM(row_width=self.row_width)
 
         markup.add(
             IKB(MSG.BTN_BACK, callback_data=self.cb_back),
@@ -70,7 +80,10 @@ class ArrowsMarkup:
         return markup
 
     def both_arrows_and_back_button(self, page_number: int, number_of_elements_on_a_page: int, max_number_of_elements_on_a_page: int = N):
-        markup = self._get_number_buttons_markup(page_number, number_of_elements_on_a_page, max_number_of_elements_on_a_page)
+        if self.with_number_buttons:
+            markup = self._get_number_buttons_markup(page_number, number_of_elements_on_a_page, max_number_of_elements_on_a_page)
+        else:
+            markup = IKM(row_width=self.row_width)
 
         markup.add(
             IKB(MSG.BTN_ARROW_BACK, callback_data=self.cb_arrow_back),
@@ -81,7 +94,10 @@ class ArrowsMarkup:
         return markup
 
     def arrow_back_and_back_button(self, page_number: int, number_of_elements_on_a_page: int, max_number_of_elements_on_a_page: int = N):
-        markup = self._get_number_buttons_markup(page_number, number_of_elements_on_a_page, max_number_of_elements_on_a_page)
+        if self.with_number_buttons:
+            markup = self._get_number_buttons_markup(page_number, number_of_elements_on_a_page, max_number_of_elements_on_a_page)
+        else:
+            markup = IKM(row_width=self.row_width)
 
         markup.add(
             IKB(MSG.BTN_ARROW_BACK, callback_data=self.cb_arrow_back),
