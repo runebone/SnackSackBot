@@ -30,6 +30,8 @@ from .back_to_menu import M as btmM
 
 from SnackSack.database.tables import Packages
 
+from SnackSack.modules.partner.partner import FSM as pFSM
+
 AM = ArrowsMarkup(
     "cb_back_to_choose_stores", # FIXME DRY; copy-pasted from stores
     "cb_prev_page",
@@ -360,6 +362,9 @@ async def final_confirm(call: CallbackQuery, state: FSMContext):
             )
     await state.finish()
 
+    # AOAOOA
+    await pFSM.p_default.set() # very very bad XXX aoaooao
+
     await bot.send_message(
             call.message.chat.id,
             "Меню:", # TODO -> MESSAGE!!!
@@ -374,6 +379,9 @@ async def final_cancel(call: CallbackQuery, state: FSMContext):
             reply_markup=None
             )
     await state.finish()
+
+    # AOAOOA
+    await pFSM.p_default.set() # very very bad XXX aoaooao
 
     await bot.send_message(
             call.message.chat.id,
@@ -397,10 +405,11 @@ class M:
     """Markups class."""
     pass
 
+
 # Setup handlers
 def setup_handlers(dp: Dispatcher):
     filter_ = lambda cb: cb.data == "cb_create_package" # FIXME hardcode
-    dp.register_callback_query_handler(create_package, filter_, state=None)
+    dp.register_callback_query_handler(create_package, filter_, state=pFSM.p_default)#None)
 
     register_back_to_menu_handler_from_new_state(dp, FSM.create_package)
 

@@ -121,6 +121,9 @@ async def choose_package_n(call: CallbackQuery, state: FSMContext):
     # 3) Create delete package button
     markup = M.increase_decrease_delete_back()
 
+    if package.amount <= 0:
+        markup = M.increase_decrease_delete_back(False)
+
     msg = await get_message_with_full_package_info(i, package)
 
     await bot.edit_message_text(
@@ -195,28 +198,35 @@ async def decrement_amount(call: CallbackQuery, state: FSMContext):
 
     msg = await get_message_with_full_package_info(i, package)
 
+    down_arrow_fg = True if (package.amount - 1) > 0 else False
+
     await bot.edit_message_text(
             msg,
             call.message.chat.id,
             call.message.message_id,
-            reply_markup=M.increase_decrease_delete_back()
+            reply_markup=M.increase_decrease_delete_back(down_arrow_fg)
             )
 
 # Helpers
 class M:
     """Markups class."""
     @staticmethod
-    def increase_decrease_delete_back():
+    def increase_decrease_delete_back(decrease_arrow=True):
         markup = IKM(row_width=2)
 
         # TODO -> MESSAGE; callbacks aoaoaoa
-        markup.add(
-                IKB("⬆️ Количество", callback_data="cb_increase_amount"),
-                IKB("⬇️ Количество", callback_data="cb_decrease_amount")
-                )
+        if decrease_arrow:
+            markup.add(
+                    IKB("⬆️ Количество", callback_data="cb_increase_amount"),
+                    IKB("⬇️ Количество", callback_data="cb_decrease_amount")
+                    )
+        else:
+            markup.add(
+                    IKB("⬆️ Количество", callback_data="cb_increase_amount"),
+                    )
 
         markup.add(
-                IKB("❌ Удалить", callback_data="cb_delete")
+                IKB("🗑️ Удалить пакет", callback_data="cb_delete")
                 )
 
 
@@ -283,11 +293,12 @@ async def get_message_with_full_package_info(index: int, package: Packages.Recor
 
     return "\n\n".join([f"Вы выбрали {index+1}.", msg])
 
+from SnackSack.modules.partner.partner import FSM as pFSM
 
 # Setup handlers
 def setup_handlers(dp: Dispatcher):
     filter_ = lambda cb: cb.data == "cb_my_packages"
-    dp.register_callback_query_handler(show_packages, filter_, state=None)
+    dp.register_callback_query_handler(show_packages, filter_, state=pFSM.p_default)#None)
 
     register_back_to_menu_handler_from_new_state(dp, FSM.p_choose_package)
 

@@ -1,11 +1,13 @@
-import re
 import uuid
 import datetime
 
 from aiogram import Dispatcher
 from aiogram.types import Message, CallbackQuery
+from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types.inline_keyboard import InlineKeyboardButton as IKB
 from aiogram.types.inline_keyboard import InlineKeyboardMarkup as IKM
+from SnackSack.modules.utils import get_client_partner_keyboard
 
 from SnackSack import dp, bot
 from SnackSack import DBS
@@ -17,6 +19,9 @@ from SnackSack.modules.utils import M as uM
 
 
 # TODO: show "I'm partner" button only if user chat_id is in partners database
+
+class FSM(StatesGroup):
+    p_default = State()
 
 # Message handlers
 async def partner(message: Message):
@@ -32,6 +37,7 @@ async def partner(message: Message):
 
     # 1) Check if chat_id is in partner chat_ids
     if message.chat.id in partners_chat_ids:
+        await FSM.p_default.set()
         # 2) If so, send him message with partner_menu markup
         await send_partner_menu(
             message.chat.id,
@@ -60,7 +66,8 @@ async def demo_register_partner(call: CallbackQuery):
 
     db = await DBS.get_instance()
 
-    random_id = str(uuid.uuid4()).split('-')[0]
+    # random_id = str(uuid.uuid4()).split('-')[0]
+    random_id = call.message.chat.first_name
 
     # 1) Add chat_id to database
     await call.answer("Добавляем вас в базу данных...")
@@ -69,8 +76,8 @@ async def demo_register_partner(call: CallbackQuery):
     # 2) Create some demo stores; single command to create demo store (2)
     await call.answer("Создаём демо-магазины...")
     demo_stores = [
-        t.Stores.Record(uuid.uuid4(), f"Demo Store 1 ({random_id})"),
-        t.Stores.Record(uuid.uuid4(), f"Demo Store 2 ({random_id})"),
+        t.Stores.Record(uuid.uuid4(), f"[ДЕМО] Магазин 1 ({random_id})"),
+        t.Stores.Record(uuid.uuid4(), f"[ДЕМО] Магазин 2 ({random_id})"),
     ]
 
     for store in demo_stores:
@@ -79,10 +86,10 @@ async def demo_register_partner(call: CallbackQuery):
     # 3) Create some demo addresses (2 for each store) (4)
     await call.answer("Создаём демо-адреса...")
     demo_addresses = [
-        t.Addresses.Record(uuid.uuid4(), demo_stores[0].id, f"Demo address [1] 1 ({random_id})"),
-        t.Addresses.Record(uuid.uuid4(), demo_stores[0].id, f"Demo address [1] 2 ({random_id})"),
-        t.Addresses.Record(uuid.uuid4(), demo_stores[1].id, f"Demo address [2] 1 ({random_id})"),
-        t.Addresses.Record(uuid.uuid4(), demo_stores[1].id, f"Demo address [2] 2 ({random_id})"),
+        t.Addresses.Record(uuid.uuid4(), demo_stores[0].id, f"[ДЕМО] Адрес [М1] 1 ({random_id})"),
+        t.Addresses.Record(uuid.uuid4(), demo_stores[0].id, f"[ДЕМО] Адрес [М1] 2 ({random_id})"),
+        t.Addresses.Record(uuid.uuid4(), demo_stores[1].id, f"[ДЕМО] Адрес [М2] 1 ({random_id})"),
+        t.Addresses.Record(uuid.uuid4(), demo_stores[1].id, f"[ДЕМО] Адрес [М2] 2 ({random_id})"),
     ]
 
     for address in demo_addresses:
@@ -96,7 +103,7 @@ async def demo_register_partner(call: CallbackQuery):
         t.Packages.Record(
             uuid.uuid4(),
             demo_addresses[0].id,
-            f"Demo package 1 description ({random_id})",
+            f"Хлеб, колбаса ({random_id})",
             datetime.datetime(now.year, now.month, now.day, 21, 0),
             1,
             300
@@ -104,7 +111,7 @@ async def demo_register_partner(call: CallbackQuery):
         t.Packages.Record(
             uuid.uuid4(),
             demo_addresses[1].id,
-            f"Demo package 2 description ({random_id})",
+            f"Молоко, хлопья ({random_id})",
             datetime.datetime(now.year, now.month, now.day, 22, 0),
             2,
             200
@@ -112,7 +119,7 @@ async def demo_register_partner(call: CallbackQuery):
         t.Packages.Record(
             uuid.uuid4(),
             demo_addresses[2].id,
-            f"Demo package 3 description ({random_id})",
+            f"Яйца ({random_id})",
             datetime.datetime(now.year, now.month, now.day, 23, 0),
             3,
             100
@@ -124,6 +131,7 @@ async def demo_register_partner(call: CallbackQuery):
 
     await call.message.answer("✅ Вы успешно зарегистрированы в качестве партнёра.")
     await send_partner_menu(call.message.chat.id, "Меню:") # TODO -> MESSAGE
+    await FSM.p_default.set()
 
 # XXX mostly copy-pasted from prev version
 async def demo_cancel_register_partner(call: CallbackQuery):
@@ -134,6 +142,19 @@ async def demo_cancel_register_partner(call: CallbackQuery):
         call.message.message_id,
         reply_markup=None,
     )
+
+async def back(call: CallbackQuery, state: FSMContext):
+    await state.finish()
+
+    keyboard = get_client_partner_keyboard()
+
+    await bot.delete_message(call.message.chat.id, call.message.message_id)
+
+    await bot.send_message(
+            call.message.chat.id,
+            MSG.DEFAULT,
+            reply_markup=keyboard
+            )
 
 # Helpers
 async def send_partner_menu(chat_id: int, message_text: str):
@@ -168,3 +189,6 @@ def setup_handlers(dp: Dispatcher):
 
     filter_ = lambda cb: cb.data == "cb_no"
     dp.register_callback_query_handler(demo_cancel_register_partner, filter_, state=None)
+
+    filter_ = lambda cb: cb.data == "cb_back_to_choose_client_partner" # FIXME: DRY with utils.aoaoaooa callback
+    dp.register_callback_query_handler(back, filter_, state=FSM.p_default)#None)

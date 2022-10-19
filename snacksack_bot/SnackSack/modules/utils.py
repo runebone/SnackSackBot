@@ -1,6 +1,8 @@
 from aiogram import Dispatcher
 from aiogram.types.inline_keyboard import InlineKeyboardButton as IKB
 from aiogram.types.inline_keyboard import InlineKeyboardMarkup as IKM
+from aiogram.types.reply_keyboard import KeyboardButton as KB
+from aiogram.types.reply_keyboard import ReplyKeyboardMarkup as RKM
 from SnackSack.database.tables import Stores, Addresses, Orders, Packages
 
 from SnackSack.messages import MSG
@@ -10,6 +12,15 @@ N = MAX_NUMBER_OF_ELEMENTS_ON_A_PAGE
 
 def state_proxy(dp: Dispatcher):
     return dp.current_state().proxy()
+
+def get_client_partner_keyboard() -> RKM:
+    client_button = KB(text=MSG.BTN_CLIENT)
+    partner_button = KB(text=MSG.BTN_PARTNER)
+
+    keyboard = RKM(resize_keyboard=True, one_time_keyboard=True)
+    keyboard = keyboard.row(client_button, partner_button)
+
+    return keyboard
 
 class M:
     """Common markups class."""
@@ -25,6 +36,9 @@ class M:
         create_package_btn = IKB("Создать пакет 🆕📦", callback_data="cb_create_package")
 
         markup.add(my_shops_btn, my_orders_btn, my_packages_btn, create_package_btn)
+
+        back_btn = IKB("⬅️ Назад", callback_data="cb_back_to_choose_client_partner")
+        markup.add(back_btn)
 
         return markup
 

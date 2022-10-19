@@ -1,0 +1,1 @@
+2022-10-19 12:54:08,469 (DEBUG) - {"inline_keyboard": [[{"text": "1", "callback_data": "cb_address1"}, {"text": "2", "callback_data": "cb_address2"}], [{"text": "Назад", "callback_data": "cb_back_to_stores"}], [{"text": "🏠 Добавить адрес", "callback_data": "cb_create_address"}]]}

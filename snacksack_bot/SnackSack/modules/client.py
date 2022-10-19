@@ -17,6 +17,7 @@ from SnackSack.database.tables import Packages, Stores, Addresses, Orders
 from SnackSack.modules.utils import state_proxy
 from SnackSack.modules.utils import ArrowsMarkup
 from SnackSack.modules.utils import get_data_to_show_in_message
+from SnackSack.modules.utils import get_client_partner_keyboard
 
 # TODO FIXME XXX: use choose_markup from utils
 # MAX_N_OF_PACKAGES_ON_A_PAGE = 5
@@ -77,11 +78,23 @@ async def choose_package(message: Message, state: FSMContext):
 
 # Callback handlers
 async def back(call: CallbackQuery, state: FSMContext):
+    async with state.proxy() as storage:
+        msg_id = storage["chosen_package_message_id"]
+        if msg_id is not None:
+            await bot.delete_message(call.message.chat.id, msg_id)
+
     await state.finish()
     await call.answer(MSG.EXITED_CHOOSE_PACKAGE_MODE)
-    await bot.edit_message_text(
-        MSG.DEFAULT, call.message.chat.id, call.message.message_id, reply_markup=None
-    )
+
+    keyboard = get_client_partner_keyboard()
+
+    await bot.delete_message(call.message.chat.id, call.message.message_id)
+
+    await bot.send_message(
+            call.message.chat.id,
+            MSG.DEFAULT,
+            reply_markup=keyboard
+            )
 
 
 async def next_page(call: CallbackQuery, state: FSMContext):
@@ -128,19 +141,25 @@ async def choose_package_n(call: CallbackQuery, state: FSMContext):
 async def cancel_order(call: CallbackQuery, state: FSMContext):
     async with state.proxy() as storage:
         # XXX MESSAGE text not in messages
-        await bot.edit_message_text(
-            f"🚫 {call.message.text}",
-            call.message.chat.id,
-            storage["chosen_package_message_id"],
-            reply_markup=None,
-        )
-        await bot.edit_message_text(
-            storage["packages_message"].text,
-            storage["packages_message"].chat.id,
-            storage["packages_message"].message_id,
-            reply_markup=None,
-        )
-    await state.finish()
+        msg_id = storage["chosen_package_message_id"]
+        storage["chosen_package_message_id"] = None
+
+        await bot.delete_message(call.message.chat.id, msg_id)
+
+        # await bot.edit_message_text(
+        #     f"🚫 {call.message.text}",
+        #     call.message.chat.id,
+        #     storage["chosen_package_message_id"],
+        #     reply_markup=None,
+        # )
+        # await bot.edit_message_text(
+        #     storage["packages_message"].text,
+        #     storage["packages_message"].chat.id,
+        #     storage["packages_message"].message_id,
+        #     reply_markup=None,
+        # )
+
+    # await state.finish()
 
 
 async def confirm_order(call: CallbackQuery, state: FSMContext):

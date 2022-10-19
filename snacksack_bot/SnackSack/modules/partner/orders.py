@@ -99,6 +99,7 @@ async def show_orders(call: CallbackQuery, state: FSMContext):
     markup.add(
             IKB("Провести покупку", callback_data="cb_make_purchase") # TODO -> MESSAGE; cb -> somewhere
             )
+    markup["inline_keyboard"].insert(0, markup["inline_keyboard"].pop()) # FIXME BAD
 
     await bot.edit_message_text(
             msg,
@@ -208,6 +209,13 @@ async def input_order_number(message: Message, state: FSMContext):
     await remove_markup(prev_message)
     await update_prev_message(msg, state)
 
+    # Notify client
+    await bot.send_message(
+            chat_id,
+            f"Заказ `{message.text}` оплачен. ✅ (Сообщение клиенту)",
+            parse_mode="markdown"
+            )
+
 
 
 # Helpers
@@ -263,10 +271,12 @@ class M:
 
         return markup
 
+from SnackSack.modules.partner.partner import FSM as pFSM
+
 # Setup handlers
 def setup_handlers(dp: Dispatcher):
     filter_ = lambda cb: cb.data == "cb_my_orders" # XXX
-    dp.register_callback_query_handler(pre_show_orders, filter_, state=None)
+    dp.register_callback_query_handler(pre_show_orders, filter_, state=pFSM.p_default)#None)
 
     register_back_to_menu_handler_from_new_state(dp, FSM.p_choose_order)
     register_back_to_menu_handler_from_new_state(dp, FSM.p_input_order_number)

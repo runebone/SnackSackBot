@@ -364,3 +364,87 @@ class PostgresDB(BaseDB):
                 package_id=package_id
                 )
         await self.execute(sql_query)
+
+    async def delete_address(self, address_id: UUID):
+        sql_query = SqlQuery(
+                f"""
+                DELETE FROM {Addresses.table}
+                WHERE {Addresses.id_} = :address_id
+                """,
+                address_id=address_id
+                )
+        await self.execute(sql_query)
+
+    async def get_packages_by_address(self, address_id: UUID):
+        sql_query = SqlQuery(
+                f"""
+                SELECT * FROM {Packages.table}
+                WHERE {Packages.address_id} = :address_id
+                """,
+                address_id=address_id
+                )
+
+        packages = list(
+            map(
+                lambda x: Packages.Record.create_from_dict(x),
+                await self.fetch(sql_query)
+            )
+        )
+
+        return packages
+
+    async def get_orders_by_package(self, package_id: UUID):
+        sql_query = SqlQuery(
+                f"""
+                SELECT * FROM {OrderPackages.table}
+                WHERE {OrderPackages.package_id} = :package_id
+                """,
+                package_id=package_id
+                )
+
+        order_packages = list(
+            map(
+                lambda x: OrderPackages.Record.create_from_dict(x),
+                await self.fetch(sql_query)
+            )
+        )
+
+        package_orders = []
+        package_orders_ids = [] # XXX aoaooa
+        for order_package in order_packages:
+            order_id = order_package.order_id
+
+            # XXX aooaooao
+            sql_query = SqlQuery(
+                    f"""
+                    SELECT * FROM {Orders.table}
+                    WHERE {Orders.id_} = :order_id
+                    """,
+                    order_id=order_id
+                    )
+
+            orders = list(
+                map(
+                    lambda x: Orders.Record.create_from_dict(x),
+                    await self.fetch(sql_query)
+                )
+            )
+
+            for order in orders:
+                if order.id not in package_orders_ids:
+                    package_orders_ids.append(order.id)
+                    package_orders.append(order)
+
+        return package_orders
+
+    async def update_address(self, address_id: UUID, new_address: str):
+        sql_query = SqlQuery(
+                f"""
+                UPDATE {Addresses.table}
+                SET {Addresses.address} = :new_address
+                WHERE {Addresses.id_} = :address_id
+                """,
+                address_id=address_id,
+                new_address=new_address
+                )
+        await self.execute(sql_query)

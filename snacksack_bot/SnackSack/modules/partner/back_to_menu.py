@@ -14,6 +14,8 @@ from SnackSack.modules.utils import M as uM
 
 cb_back_to_menu = "cb_back_to_menu"
 
+from SnackSack.modules.partner.partner import FSM as pFSM
+
 async def back_to_menu(call: CallbackQuery, state: FSMContext):
     # TODO: -> MESSAGE
     await bot.edit_message_text(
@@ -25,6 +27,7 @@ async def back_to_menu(call: CallbackQuery, state: FSMContext):
 
     if state is not None:
         await state.finish()
+        await pFSM.p_default.set()
 
 
 class M:
@@ -46,4 +49,5 @@ def register_back_to_menu_handler_from_new_state(dp: Dispatcher, state: State | 
 
 
 def setup_handlers(dp: Dispatcher):
-    register_back_to_menu_handler_from_new_state(dp, None)
+    # register_back_to_menu_handler_from_new_state(dp, None)
+    register_back_to_menu_handler_from_new_state(dp, pFSM.p_default)
