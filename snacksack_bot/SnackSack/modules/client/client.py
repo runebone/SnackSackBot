@@ -120,16 +120,22 @@ async def choose_package_n(call: CallbackQuery, state: FSMContext):
 
         chosen_package = storage["packages"][n - 1]
 
+        db = await DBS.get_instance()
+
+        chosen_package_address = await db.get_by_id(Addresses, chosen_package.address_id)
+
+        chosen_package_store = await db.get_by_id(Stores, chosen_package_address.store_id)
+
         if storage["chosen_package_message_id"] is None:
             msg = await bot.send_message(
                 call.message.chat.id,
-                MSG.FMT_YOU_HAVE_CHOSEN.format(index=n, package=chosen_package),
+                MSG.FMT_YOU_HAVE_CHOSEN_FULL.format(index=n, package=chosen_package, store=chosen_package_store, address=chosen_package_address),
                 reply_markup=markup,
             )
             storage["chosen_package_message_id"] = msg.message_id
         else:
             await bot.edit_message_text(
-                MSG.FMT_YOU_HAVE_CHOSEN.format(index=n, package=chosen_package),
+                MSG.FMT_YOU_HAVE_CHOSEN_FULL.format(index=n, package=chosen_package, store=chosen_package_store, address=chosen_package_address),
                 call.message.chat.id,
                 storage["chosen_package_message_id"],
                 reply_markup=markup,

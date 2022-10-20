@@ -40,6 +40,16 @@ class RU:
 Осталось пакетов: {package.amount}\
 " # FIXME: DRY
 
+    FMT_YOU_HAVE_CHOSEN_FULL = "<b>Вы выбрали: {index}</b>\n\
+Магазин: {store.name}\n\
+Адрес: {address.address}\n\
+Описание: {package.description}\n\
+Цена одного пакета: {package.price}\n\
+Забрать до: {package.time}\n\
+Осталось пакетов: {package.amount}\
+" # FIXME: DRY
+
+
     EXITED_CHOOSE_PACKAGE_MODE = "ℹ️ Вы вышли из режима выбора пакета."
 
     BTN_CONFIRM = "✅ Подтвердить"

@@ -92,6 +92,14 @@ async def choose_store(call: CallbackQuery, state: FSMContext):
             store_index = int(re.findall(r"store(\d+)", call.data)[0])
             storage["chosen_store_index"] = store_index #- 1 # DANGER - 1
 
+        # aoaooa
+        if storage["desc_confirm_msg"] is not None:
+            await bot.delete_message(
+                call.message.chat.id,
+                storage["desc_confirm_msg"].message_id
+            )
+            storage["desc_confirm_msg"] = None
+
     await pre_choose_address(call, state)
 
 
@@ -152,6 +160,8 @@ async def pre_input_description(call: CallbackQuery, state: FSMContext):
             )
         )
 
+        storage["desc_confirm_msg"] = None # aooaoaoo
+
     # TODO -> MESSAGE
     msg = "Введите описание пакета (какие продукты в него входят):"
 
@@ -194,6 +204,9 @@ async def pre_confirm_description(message: Message, state: FSMContext):
 
 
 async def confirm_description(call: CallbackQuery, state: FSMContext):
+    async with state.proxy() as storage:
+        storage["desc_confirm_msg"] = None
+
     await pre_input_price(call, state)
 
 async def pre_input_price(call: CallbackQuery, state: FSMContext):
