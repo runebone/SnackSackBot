@@ -212,7 +212,7 @@ async def input_order_number(message: Message, state: FSMContext):
     # Notify client
     await bot.send_message(
             chat_id,
-            f"Заказ `{message.text}` оплачен. ✅ (Сообщение клиенту)",
+            f"Заказ `{message.text}` оплачен. ✅",
             parse_mode="markdown"
             )
 

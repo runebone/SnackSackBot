@@ -125,6 +125,14 @@ class Packages():
             HHmm_time = dt.split()[1][:-3]
             return HHmm_time
 
+        @property
+        def datetime(self):
+            # dt = str(self.pickup_before)
+            # HHmm_time = dt.split()[1][:-3]
+            dt = self.pickup_before
+            str_dt = "{:02d}.{:02d} {:02d}:{:02d}".format(dt.day, dt.month, dt.hour, dt.minute)
+            return str_dt
+
 
 class Orders():
     table = _Table("orders")

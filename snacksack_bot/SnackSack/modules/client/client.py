@@ -19,6 +19,8 @@ from SnackSack.modules.utils import ArrowsMarkup
 from SnackSack.modules.utils import get_data_to_show_in_message
 from SnackSack.modules.utils import get_client_partner_keyboard
 
+# from SnackSack.modules.start import default
+
 # TODO FIXME XXX: use choose_markup from utils
 # MAX_N_OF_PACKAGES_ON_A_PAGE = 5
 
@@ -86,15 +88,15 @@ async def back(call: CallbackQuery, state: FSMContext):
     await state.finish()
     await call.answer(MSG.EXITED_CHOOSE_PACKAGE_MODE)
 
-    keyboard = get_client_partner_keyboard()
+    # keyboard = get_client_partner_keyboard()
 
     await bot.delete_message(call.message.chat.id, call.message.message_id)
 
-    await bot.send_message(
-            call.message.chat.id,
-            MSG.DEFAULT,
-            reply_markup=keyboard
-            )
+    # await bot.send_message(
+    #         call.message.chat.id,
+    #         MSG.DEFAULT,
+    #         reply_markup=keyboard
+    #         )
 
 
 async def next_page(call: CallbackQuery, state: FSMContext):
@@ -208,6 +210,12 @@ async def create_order(call: CallbackQuery, state: FSMContext):
     await call.answer("✅ Заказ успешно создан")
 
     await call.message.answer(f"🧾 Номер заказа: `{call.message.chat.id}-{random_number}`", parse_mode="markdown")
+
+    # aoaoa
+    # await default(call.message, state)
+    # await state.finish()
+    # await client(call.message)
+    # await state.finish()
 
 
 # Helpers

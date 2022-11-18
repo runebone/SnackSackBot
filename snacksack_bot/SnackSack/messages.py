@@ -13,7 +13,7 @@ class RU:
     FMT_PACKAGE = "{index}.\n\
 Описание: {package.description}\n\
 Цена одного пакета: {package.price}\n\
-Забрать до: {package.time}\n\
+Забрать до: {package.datetime}\n\
 Осталось пакетов: {package.amount}\
 "
 
@@ -28,7 +28,7 @@ class RU:
 Адрес: {address.address}\n\
 Описание: {package.description}\n\
 Цена одного пакета: {package.price}\n\
-Забрать до: {package.time}\n\
+Забрать до: {package.datetime}\n\
 Осталось пакетов: {package.amount}\
 "
 
@@ -36,7 +36,7 @@ class RU:
 
     FMT_YOU_HAVE_CHOSEN = "<b>Вы выбрали: {index}</b>\n\
 Описание: {package.description}\n\
-Забрать до: {package.time}\n\
+Забрать до: {package.datetime}\n\
 Осталось пакетов: {package.amount}\
 " # FIXME: DRY
 
@@ -45,7 +45,7 @@ class RU:
 Адрес: {address.address}\n\
 Описание: {package.description}\n\
 Цена одного пакета: {package.price}\n\
-Забрать до: {package.time}\n\
+Забрать до: {package.datetime}\n\
 Осталось пакетов: {package.amount}\
 " # FIXME: DRY
 

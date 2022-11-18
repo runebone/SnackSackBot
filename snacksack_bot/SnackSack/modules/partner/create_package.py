@@ -44,6 +44,9 @@ class FSM(StatesGroup):
     input_description = State()
     input_price = State()
     input_amount = State()
+
+    choose_date = State()
+
     input_time = State()
     final = State()
 
@@ -70,6 +73,9 @@ async def create_package(call: CallbackQuery):
         storage["chosen_address_index"] = None
 
         storage["description"] = None
+
+        storage["date"] = None
+
         storage["time"] = None
         storage["amount"] = None
         storage["price"] = None
@@ -273,7 +279,47 @@ async def input_amount(message: Message, state: FSMContext):
         async with state.proxy() as storage:
             storage["amount"] = int(message.text)
 
-        await pre_input_time(message, state)
+        # await pre_input_time(message, state)
+        await pre_choose_today_tomorrow_date(message, state)
+
+
+
+async def pre_choose_today_tomorrow_date(message: Message, state: FSMContext):
+    markup = IKM(row_width=1)
+    # FIXME: ugly... define all callbacks name in one place (mb on top)
+    markup.add(
+        IKB(
+            "Сегодня",
+            callback_data="cb_pickup_today"
+            ),
+        IKB(
+            "Завтра",
+            callback_data="cb_pickup_tomorrow"
+            ),
+        IKB(
+            MSG.BTN_BACK,
+            callback_data=f"cb_back_to_input_amount"
+        )
+    )
+
+    await message.answer("Введите, когда нужно забрать пакет:", reply_markup=markup)
+
+    await FSM.choose_date.set()
+
+# async def choose_today_tomorrow_date(message: Message, state: FSMContext):
+#     pass
+
+async def today_chosen(call: CallbackQuery, state: FSMContext):
+    async with state.proxy() as storage:
+        storage["date"] = datetime.datetime.now()
+    await pre_input_time(call.message, state)
+
+async def tomorrow_chosen(call: CallbackQuery, state: FSMContext):
+    async with state.proxy() as storage:
+        storage["date"] = datetime.datetime.now() + datetime.timedelta(days=1)
+    await pre_input_time(call.message, state)
+
+
 
 async def pre_input_time(message: Message, state: FSMContext):
     markup = IKM(row_width=1)
@@ -281,15 +327,24 @@ async def pre_input_time(message: Message, state: FSMContext):
     markup.add(
         IKB(
             MSG.BTN_BACK,
-            callback_data=f"cb_back_to_input_amount"
+            # callback_data=f"cb_back_to_input_amount"
+            callback_data=f"cb_back_to_choose_date"
         )
     )
 
-    await message.answer("Введите, до какого времени сегодня пакет нужно забрать (в формате <b>HH:mm</b>):", reply_markup=markup)
+    # await message.answer("Введите, до какого времени сегодня пакет нужно забрать (в формате <b>HH:mm</b>):", reply_markup=markup)
+    await bot.edit_message_text(
+            "Введите, до какого времени сегодня пакет нужно забрать (в формате <b>HH:mm</b>):",
+            message.chat.id,
+            message.message_id,
+            reply_markup=markup
+            )
     await FSM.input_time.set()
 
 async def input_time(message: Message, state: FSMContext):
     message_is_valid = bool(re.fullmatch(r"(\d|[01]\d|2[0-3]):([0-5]\d)", message.text.strip()))
+
+    # TODO: check if time is valid
 
     if not message_is_valid:
         await message.answer("Введите время в формате <b>HH:mm</b> (23:00, 21:30...):")
@@ -308,12 +363,13 @@ async def final(message: Message, state: FSMContext):
     async with state.proxy() as storage:
         si = storage["chosen_store_index"]
         ai = storage["chosen_address_index"]
+        date = storage["date"]
         msg = [
             "Итого:\n",
             f"Магазин: {storage['stores'][si].name}",
             f"Адрес: {storage['store_addresses'][ai].address}",
             f"Описание: {storage['description']}",
-            f"Забрать до: {storage['time']}",
+            f"Забрать до: {date.day}.{date.month}.{date.year} {storage['time']}",
             f"Цена: {storage['price']}",
             f"Кол-во: {storage['amount']}"
         ]
@@ -348,11 +404,13 @@ async def final_confirm(call: CallbackQuery, state: FSMContext):
     async with state.proxy() as storage:
         ai = storage["chosen_address_index"]
 
-        now = datetime.datetime.now()
+        # now = datetime.datetime.now()
+        date = storage["date"]
 
         HH, mm = map(int, storage["time"].split(':'))
 
-        pickup_before_dt = datetime.datetime(now.year, now.month, now.day, HH, mm)
+        # pickup_before_dt = datetime.datetime(now.year, now.month, now.day, HH, mm)
+        pickup_before_dt = datetime.datetime(date.year, date.month, date.day, HH, mm)
 
         package = Packages.Record(
                 uuid.uuid4(),
@@ -456,7 +514,18 @@ def setup_handlers(dp: Dispatcher):
     dp.register_callback_query_handler(back_to_input_price, filter_, state=FSM.input_amount)
 
     filter_ = lambda cb: cb.data == "cb_back_to_input_amount"
-    dp.register_callback_query_handler(back_to_input_amount, filter_, state=FSM.input_time)
+    # dp.register_callback_query_handler(back_to_input_amount, filter_, state=FSM.input_time)
+    dp.register_callback_query_handler(back_to_input_amount, filter_, state=FSM.choose_date)
+
+    filter_ = lambda cb: cb.data == "cb_back_to_choose_date"
+    dp.register_callback_query_handler(pre_choose_today_tomorrow_date, filter_, state=FSM.input_time) # TODO: back_to_choose_date mb
+
+    filter_ = lambda cb: cb.data == "cb_pickup_today"
+    dp.register_callback_query_handler(today_chosen, filter_, state=FSM.choose_date)
+
+    filter_ = lambda cb: cb.data == "cb_pickup_tomorrow"
+    dp.register_callback_query_handler(tomorrow_chosen, filter_, state=FSM.choose_date)
+
 
     filter_ = lambda cb: cb.data == "cb_back_to_input_time"
     dp.register_callback_query_handler(back_to_input_time, filter_, state=FSM.final)

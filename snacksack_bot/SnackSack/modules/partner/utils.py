@@ -1,3 +1,5 @@
+import uuid
+
 from aiogram.types.inline_keyboard import InlineKeyboardButton as IKB
 from aiogram.types.inline_keyboard import InlineKeyboardMarkup as IKM
 
@@ -6,6 +8,7 @@ from SnackSack.messages import MSG
 from SnackSack.database.tables import Stores, Addresses, Orders, Packages
 
 from .back_to_menu import cb_back_to_menu
+
 
 async def get_addresses_list(chat_id: int):
     db = await DBS.get_instance()
@@ -30,6 +33,18 @@ async def get_stores_list(chat_id: int):
             stores.append(store)
 
     return stores
+
+import SnackSack.database.tables as t
+async def register_partner(chat_id: int, store_name: str, store_address: str):
+    db = await DBS.get_instance()
+
+    await db.create_partner(chat_id)
+
+    store = t.Stores.Record(uuid.uuid4(), store_name)
+    await db.create_store(store)
+
+    address = t.Addresses.Record(uuid.uuid4(), store.id, store_address)
+    await db.create_address(chat_id, address)
 
 class M:
     """Markups class."""

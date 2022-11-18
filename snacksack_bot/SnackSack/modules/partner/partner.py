@@ -48,10 +48,12 @@ async def partner(message: Message):
     else:
         # 3) If it's not, in DEMO version, offer him to register as a partner
         # TODO: move to MESSAGE
-        await send_partner_register_offer(
-            message.chat.id,
-            "Похоже вас нет в базе данных. Хотите стать партнёром?"
-        )
+        # await send_partner_register_offer(
+        #     message.chat.id,
+        #     "Похоже вас нет в базе данных. Хотите стать партнёром?"
+        # )
+        from SnackSack.modules.start import default
+        await default(message)
 
 # Callback query handlers
 # XXX partially copy-pasted from prev version
