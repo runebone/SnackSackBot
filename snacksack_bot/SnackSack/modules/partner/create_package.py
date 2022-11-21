@@ -334,7 +334,7 @@ async def pre_input_time(message: Message, state: FSMContext):
 
     # await message.answer("Введите, до какого времени сегодня пакет нужно забрать (в формате <b>HH:mm</b>):", reply_markup=markup)
     await bot.edit_message_text(
-            "Введите, до какого времени сегодня пакет нужно забрать (в формате <b>HH:mm</b>):",
+            "Введите, до какого времени пакет нужно забрать (в формате <b>HH:mm</b>):",
             message.chat.id,
             message.message_id,
             reply_markup=markup

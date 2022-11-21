@@ -34,3 +34,15 @@ amount: 5
 price: 12
 time: 12:34
 datetime: 19.11 12:34
+2022-11-21 15:29:50,272 (INFO) - 💸
+Совершена покупка:
+- Номер заказа: 902105028-2534
+- Состав:
+id: 19bbd01a-d97f-43bc-a6f9-23a0c6a8c467
+address_id: 3e0b95da-0a80-400b-a21d-cf7c717b7e93
+description: lskdjfldsf
+pickup_before: 2022-11-19 12:34:00
+amount: 3
+price: 12
+time: 12:34
+datetime: 19.11 12:34
