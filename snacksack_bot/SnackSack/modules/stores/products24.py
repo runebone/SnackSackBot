@@ -43,4 +43,4 @@ async def register(message: types.Message):
 
 # Registering handlers
 def setup_handlers(dp: Dispatcher):
-    dp.register_message_handler(register, commands=["products24"], state="*")
+    dp.register_message_handler(register, commands=["products24"], state=None)
